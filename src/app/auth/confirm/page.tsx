@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Store, Loader2, CheckCircle2 } from "lucide-react";
@@ -15,7 +15,8 @@ import { InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator } from "@/comp
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
-export default function ConfirmCodePage() {
+// Componente interno que usa useSearchParams — debe estar dentro de Suspense
+function ConfirmCodeForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const prefillEmail = searchParams.get("email") ?? "";
@@ -145,5 +146,19 @@ export default function ConfirmCodePage() {
         </Card>
       </div>
     </div>
+  );
+}
+
+// Página exportada — envuelve el form en Suspense para que Next.js pueda
+// prerenderizar el shell estático sin ejecutar useSearchParams en build time
+export default function ConfirmCodePage() {
+  return (
+    <Suspense fallback={
+      <div className="container flex h-screen w-screen flex-col items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+      </div>
+    }>
+      <ConfirmCodeForm />
+    </Suspense>
   );
 }

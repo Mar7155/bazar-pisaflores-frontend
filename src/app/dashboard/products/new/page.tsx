@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
 import { PackageOpen, Loader2, DollarSign } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -16,9 +16,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-export default function NewProductPage() {
+function NewProductForm() {
   const searchParams = useSearchParams();
-  // businessId is passed as a query param: /dashboard/products/new?businessId=biz-1
   const businessId = searchParams.get("businessId") || "biz-1";
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -145,5 +144,17 @@ export default function NewProductPage() {
         </div>
       </form>
     </div>
+  );
+}
+
+export default function NewProductPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+      </div>
+    }>
+      <NewProductForm />
+    </Suspense>
   );
 }
