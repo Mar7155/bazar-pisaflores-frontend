@@ -98,12 +98,13 @@ export default function RegisterPage() {
                 {errors.email && <p className="text-sm text-red-500 font-medium">{errors.email.message}</p>}
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2 flex flex-col">
                 <Label htmlFor="password">Contraseña</Label>
+                <Label htmlFor="password" className="text-sm text-muted-foreground">Mínimo 8 caracteres, una mayúscula, un número y un caracter especial</Label>
                 <Input
                   id="password"
                   type="password"
-                  placeholder="Mínimo 8 caracteres"
+                  placeholder="*********"
                   {...register("password")}
                   className={errors.password ? "border-red-500 focus-visible:ring-red-500" : ""}
                 />
@@ -115,7 +116,7 @@ export default function RegisterPage() {
                 <Input
                   id="confirmPassword"
                   type="password"
-                  placeholder="••••••••"
+                  placeholder="*********"
                   {...register("confirmPassword")}
                   className={errors.confirmPassword ? "border-red-500 focus-visible:ring-red-500" : ""}
                 />
