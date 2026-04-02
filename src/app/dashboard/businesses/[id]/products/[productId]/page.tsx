@@ -4,7 +4,7 @@ import { PackageOpen, ArrowLeft, LayoutDashboard, ExternalLink } from "lucide-re
 import { Button } from "@/components/ui/button";
 import { getBusinessProductById, getBusinessById } from "@/lib/api";
 import { ProductEditForm } from "@/components/dashboard/product-edit-form";
-import { ProductMediaManager } from "@/components/dashboard/product-media-manager";
+import { MediaManager } from "@/components/dashboard/media-manager";
 import { DeleteProductButton } from "@/components/dashboard/delete-product-button";
 
 export default async function DashboardProductPage({
@@ -79,10 +79,14 @@ export default async function DashboardProductPage({
 
             {/* Media Manager (Right/Side) */}
             <div className="lg:col-span-12 xl:col-span-5 space-y-6">
-               <ProductMediaManager 
+               <MediaManager 
+                  entityType="product"
+                  entityId={productId} 
                   businessId={businessId} 
-                  productId={productId} 
-                  currentImages={product.images || []} 
+                  currentImages={product.images || []}
+                  title="Galería del Producto"
+                  description="Gestiona las fotos de este producto. La primera se usará como portada en el catálogo."
+                  maxImages={5}
                />
                
                <div className="bg-muted/30 border border-border/50 p-6 rounded-3xl text-sm italic text-muted-foreground text-center">

@@ -23,6 +23,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { appToast } from "@/lib/toast";
 import { Business, Category } from "@/types";
+import { MediaManager } from "./media-manager";
 
 const DAYS_ES = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
 
@@ -226,6 +227,24 @@ export function BusinessSettingsForm({ business, categories, id }: BusinessSetti
                   </CardContent>
                </form>
             </Card>
+         </section>
+
+         {/* 1.5. GALERÍA DE IMÁGENES SECTION */}
+         <section className="space-y-6">
+            <div className="flex items-center gap-2 px-1">
+               <div className="w-1.5 h-6 bg-yellow-500 rounded-full shadow-sm shadow-yellow-500/20" />
+               <h2 className="text-xl font-bold tracking-tight">Galería de Imágenes</h2>
+            </div>
+            
+            <MediaManager 
+               entityType="business"
+               entityId={id}
+               businessId={id}
+               currentImages={business.images || []}
+               title="Fotos del Establecimiento"
+               description="Sube fotos de tu local, menú o escaparate. La imagen de portada será la que vean los clientes en el directorio."
+               maxImages={5}
+            />
          </section>
 
          {/* 2. HORARIOS DE ATENCIÓN SECTION */}

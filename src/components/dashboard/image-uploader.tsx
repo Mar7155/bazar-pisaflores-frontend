@@ -7,14 +7,23 @@ import { toast } from "sonner";
 import { getPresignedUrlAction, confirmUploadAction } from "@/actions/mutations";
 import { uploadFileToS3 } from "@/lib/api";
 
-interface ProductImageUploaderProps {
+interface ImageUploaderProps {
+  entityType: 'business' | 'product';
+  entityId: string;
   businessId: string;
-  productId: string;
   currentCount: number;
+  maxImages?: number;
   onSuccess: () => void;
 }
 
-export function ProductImageUploader({ businessId, productId, currentCount, onSuccess }: ProductImageUploaderProps) {
+export function ImageUploader({ 
+  entityType, 
+  entityId, 
+  businessId, 
+  currentCount, 
+  maxImages = 5,
+  onSuccess 
+}: ImageUploaderProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadFiles, setUploadFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
@@ -22,8 +31,8 @@ export function ProductImageUploader({ businessId, productId, currentCount, onSu
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(e.target.files || []);
-    if (currentCount + uploadFiles.length + selectedFiles.length > 5) {
-      toast.error("Un producto puede tener máximo 5 imágenes.");
+    if (currentCount + uploadFiles.length + selectedFiles.length > maxImages) {
+      toast.error(`Puedes tener un máximo de ${maxImages} imágenes.`);
       return;
     }
 
@@ -69,7 +78,7 @@ export function ProductImageUploader({ businessId, productId, currentCount, onSu
         const isThisCover = coverIndex === i || (currentCount === 0 && i === 0);
 
         // 1. Get Presigned URL (Server Action)
-        const presigned = await getPresignedUrlAction('product', productId, file.type);
+        const presigned = await getPresignedUrlAction(entityType, entityId, file.type);
         if (presigned.error || !presigned.url || !presigned.key) {
           throw new Error(presigned.error || "No se pudo obtener la URL de subida.");
         }
@@ -78,7 +87,8 @@ export function ProductImageUploader({ businessId, productId, currentCount, onSu
         await uploadFileToS3(presigned.url, file);
 
         // 3. Confirm in DB (Server Action)
-        const confirmation = await confirmUploadAction(businessId, productId, 'product', presigned.key, isThisCover);
+        const productId = entityType === 'product' ? entityId : undefined;
+        const confirmation = await confirmUploadAction(businessId, productId, entityType, presigned.key, isThisCover);
         if (confirmation.error) {
           throw new Error(confirmation.error);
         }
@@ -102,34 +112,35 @@ export function ProductImageUploader({ businessId, productId, currentCount, onSu
     <div className="space-y-6">
       <div className="space-y-4">
         <h4 className="text-sm font-black uppercase tracking-widest text-muted-foreground">
-          {currentCount > 0 ? "Añadir más fotos" : "Subir primera foto"}
+          {currentCount > 0 ? "Añadir más fotos" : "Subir fotos"}
         </h4>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
           {previews.map((src, index) => (
-            <div key={index} className={`relative aspect-square rounded-2xl overflow-hidden border-2 transition-all ${coverIndex === index ? 'border-yellow-500 shadow-lg shadow-yellow-500/20' : 'border-border'}`}>
+            <div key={index} className={`relative aspect-square rounded-2xl overflow-hidden border-2 transition-all ${coverIndex === index ? 'border-yellow-500 shadow-lg shadow-yellow-500/20 scale-95' : 'border-border opacity-90'}`}>
               <img src={src} alt="Pre-upload" className="w-full h-full object-cover" />
               <button
                 onClick={() => removeUploadFile(index)}
-                className="absolute top-2 right-2 bg-black/60 text-white p-1.5 rounded-full hover:bg-red-500 transition-colors shadow-lg"
+                className="absolute top-2 right-2 bg-black/60 text-white p-1.5 rounded-full hover:bg-red-500 transition-colors shadow-lg z-10"
               >
-                <X className="w-4 h-4" />
+                <X className="w-3 h-3" />
               </button>
               <button
                 onClick={() => setCoverIndex(index)}
-                className={`absolute bottom-2 left-2 px-3 py-1.5 rounded-full text-[10px] font-black tracking-tighter shadow-md transition-all ${coverIndex === index ? 'bg-yellow-500 text-white translate-y-0' : 'bg-black/60 text-white hover:bg-black/80'}`}
+                className={`absolute bottom-2 left-2 right-2 py-1.5 rounded-xl text-[9px] font-black tracking-tighter shadow-md transition-all z-10 ${coverIndex === index ? 'bg-yellow-500 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`}
               >
-                {coverIndex === index ? "★ PORTADA ELEGIDA" : "HACER PORTADA"}
+                {coverIndex === index ? "★ PORTADA" : "USAR PORTADA"}
               </button>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
             </div>
           ))}
 
-          {(currentCount + uploadFiles.length < 5) && !isUploading && (
-            <label className="flex flex-col items-center justify-center aspect-square border-2 border-dashed border-primary/30 rounded-2xl cursor-pointer hover:bg-primary/5 hover:border-primary transition-all text-muted-foreground hover:text-primary gap-2 group">
+          {(currentCount + uploadFiles.length < maxImages) && !isUploading && (
+            <label className="flex flex-col items-center justify-center aspect-square border-2 border-dashed border-primary/20 rounded-2xl cursor-pointer hover:bg-primary/5 hover:border-primary/40 transition-all text-muted-foreground hover:text-primary gap-2 group">
               <div className="bg-primary/10 p-3 rounded-full group-hover:scale-110 transition-transform">
-                <UploadCloud className="w-8 h-8" />
+                <UploadCloud className="w-6 h-6" />
               </div>
-              <span className="text-xs font-black uppercase tracking-tighter">Seleccionar</span>
+              <span className="text-[10px] font-black uppercase tracking-widest">Seleccionar</span>
               <input
                 type="file"
                 accept="image/*"
@@ -143,16 +154,16 @@ export function ProductImageUploader({ businessId, productId, currentCount, onSu
       </div>
 
       {uploadFiles.length > 0 && (
-        <div className="flex justify-end pt-6 border-t border-border">
+        <div className="flex justify-end pt-6 border-t border-border/50">
           <Button
             onClick={handleSaveImages}
             disabled={isUploading}
-            className="px-8 h-12 rounded-xl font-black text-lg gap-3 shadow-xl shadow-primary/20"
+            className="px-10 h-14 rounded-2xl font-black text-lg gap-3 shadow-2xl shadow-primary/20"
           >
             {isUploading ? (
-              <><Loader2 className="w-5 h-5 animate-spin" /> Subiendo...</>
+              <><Loader2 className="w-6 h-6 animate-spin" /> Procesando...</>
             ) : (
-              <><CheckCircle className="w-5 h-5" /> Guardar Galería</>
+              <><CheckCircle className="w-6 h-6" /> Guardar en Galería</>
             )}
           </Button>
         </div>

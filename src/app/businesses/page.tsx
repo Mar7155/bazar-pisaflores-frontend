@@ -106,7 +106,7 @@ export default async function BusinessesPage({
                         {biz.category.name}
                       </span>
                     )}
-                    <span className={`text-white text-xs font-bold px-2 py-1 rounded flex items-center gap-1 shadow-sm ${isOpen ? "bg-green-500" : "bg-red-500"}`}>
+                    <span className={`text-white text-xs font-bold px-2 py-1 rounded flex items-center gap-1 shadow-sm ${isOpen ? "bg-green-700" : "bg-red-500"}`}>
                       <Clock className="w-3 h-3" /> {isOpen ? "Abierto" : "Cerrado"}
                     </span>
                   </div>

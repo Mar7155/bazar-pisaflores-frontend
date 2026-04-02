@@ -40,13 +40,16 @@ export interface Business {
   flash_offers?: FlashOffer[];
 }
 
-export interface BusinessImage {
+export interface Image {
   id: string;
-  business_id: string;
   s3_key: string;
   size: ImageSize;
   is_cover: boolean;
   created_at: string;
+}
+
+export interface BusinessImage extends Image {
+  business_id: string;
 }
 
 export interface Product {
@@ -62,13 +65,8 @@ export interface Product {
   images?: ProductImage[];
 }
 
-export interface ProductImage {
-  id: string;
+export interface ProductImage extends Image {
   product_id: string;
-  s3_key: string;
-  size: ImageSize;
-  is_cover: boolean;
-  created_at: string;
 }
 
 export interface Schedule {
