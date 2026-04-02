@@ -447,7 +447,7 @@ export async function getBusinessProductById(businessId: string, productId: stri
 
 export async function getPresignedUrl(entityType: 'business' | 'product', entityId: string, mimeType: string): Promise<{ url: string; key: string }> {
   if (USE_MOCK) return { url: "https://mock-s3-url.com", key: `mock-${entityId}-${Date.now()}.jpg` };
-  
+
   return apiFetch<{ url: string; key: string }>("/upload/presigned-url", {
     method: "POST",
     body: JSON.stringify({ entityType, entityId, mimeType }),
@@ -561,6 +561,39 @@ export async function updateBusiness(id: string, data: BusinessRegistrationFormV
   return updated;
 }
 
+export async function pauseBusiness(businessId: string): Promise<void> {
+  if (!USE_MOCK) {
+    await apiFetch<void>(`/businesses/${businessId}/pause`, {
+      method: "PATCH",
+    });
+    return;
+  }
+  await sleep(300);
+  businessesMock = businessesMock.filter(b => b.id !== businessId);
+}
+
+export async function activeBusiness(businessId: string): Promise<void> {
+  if (!USE_MOCK) {
+    await apiFetch<void>(`/businesses/${businessId}/restore`, {
+      method: "PATCH",
+    });
+    return;
+  }
+  await sleep(300);
+
+}
+
+export async function deleteBusiness(businessId: string): Promise<void> {
+  if (!USE_MOCK) {
+    await apiFetch<void>(`/businesses/${businessId}`, {
+      method: "DELETE",
+    });
+    return;
+  }
+  await sleep(300);
+  businessesMock = businessesMock.filter(b => b.id !== businessId);
+}
+
 export async function updateBusinessSchedules(businessId: string, schedules: Schedule[]): Promise<Schedule[]> {
   if (!USE_MOCK) {
     const raw = await apiFetch<unknown>(`/businesses/${businessId}/schedules`, {
@@ -654,7 +687,7 @@ export async function updateBusinessProduct(businessId: string, productId: strin
   await sleep(300);
   const index = productsMock.findIndex(p => p.id === productId);
   if (index === -1) throw new Error("Producto no encontrado.");
-  
+
   const updated = {
     ...productsMock[index],
     name: data.name,
@@ -688,4 +721,3 @@ export async function deleteFlashOffer(businessId: string, offerId: string): Pro
   await sleep(300);
   flashOffersMock = flashOffersMock.filter(o => o.id !== offerId);
 }
-

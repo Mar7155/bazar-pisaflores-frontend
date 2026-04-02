@@ -30,13 +30,31 @@ export function DashboardClientContent({ status }: { status: string | null }) {
 
       {status === 'offer_created' && (
         <div className="bg-green-100 border border-green-200 text-green-800 p-4 rounded-lg flex items-center justify-between animate-slide-up">
-          <span className="font-semibold">¡Oferta publicada! Ya está activa en tu vitrina.</span>
+          <span className="font-semibold">¡Oferta publicada!</span>
         </div>
       )}
 
       {status === 'product_added' && (
         <div className="bg-green-100 border border-green-200 text-green-800 p-4 rounded-lg flex items-center justify-between animate-slide-up">
           <span className="font-semibold">¡Producto publicado! Ya está visible en tu catálogo.</span>
+        </div>
+      )}
+
+      {status === 'paused' && (
+        <div className="bg-yellow-100 border border-yellow-200 text-yellow-800 p-4 rounded-lg flex items-center justify-between animate-slide-up">
+          <span className="font-semibold">¡Negocio pausado! Ya no está visible en tu catálogo.</span>
+        </div>
+      )}
+
+      {status === 'active' && (
+        <div className="bg-green-100 border border-green-200 text-green-800 p-4 rounded-lg flex items-center justify-between animate-slide-up">
+          <span className="font-semibold">¡Negocio activo!</span>
+        </div>
+      )}
+
+      {status === 'deleted' && (
+        <div className="bg-red-100 border border-red-200 text-red-800 p-4 rounded-lg flex items-center justify-between animate-slide-up">
+          <span className="font-semibold">¡Negocio eliminado!</span>
         </div>
       )}
 
@@ -74,44 +92,45 @@ export function DashboardClientContent({ status }: { status: string | null }) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
         {myBusinesses.map((biz) => (
-          <div key={biz.id} className="border border-border p-6 rounded-2xl flex flex-col gap-4 bg-card shadow-sm hover:border-primary/50 transition-colors group relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-2 bg-primary"></div>
-            <div className="flex items-start justify-between">
-              <div className="bg-primary/20 p-3 rounded-xl text-primary font-bold">
-                <Store className="w-6 h-6" />
+          biz.is_active && (
+            <div key={biz.id} className="border border-border p-6 rounded-2xl flex flex-col gap-4 bg-card shadow-sm hover:border-primary/50 transition-colors group relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-2 bg-primary"></div>
+              <div className="flex items-start justify-between">
+                <div className="bg-primary/20 p-3 rounded-xl text-primary font-bold">
+                  <Store className="w-6 h-6" />
+                </div>
+                <span className={`text-xs font-bold px-2 py-1 rounded ${biz.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                  {biz.is_active ? 'Publicado' : 'Pausado'}
+                </span>
               </div>
-              <span className={`text-xs font-bold px-2 py-1 rounded ${biz.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                {biz.is_active ? 'Publicado' : 'Pausado'}
-              </span>
-            </div>
 
-            <div>
-              <h2 className="text-xl font-bold group-hover:text-primary transition-colors">{biz.name}</h2>
-              <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
-                <MapPin className="w-4 h-4" /> {biz.address || "Sin dirección"}
+              <div>
+                <h2 className="text-xl font-bold group-hover:text-primary transition-colors">{biz.name}</h2>
+                <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
+                  <MapPin className="w-4 h-4" /> {biz.address || "Sin dirección"}
+                </div>
               </div>
-            </div>
 
-            <div className="grid grid-cols-2 gap-2 mt-auto pt-4 border-t border-border/50">
-              <div className="flex flex-col">
+              <div className="grid grid-cols-2 gap-2 mt-auto pt-4 border-t border-border/50">
+                {/* <div className="flex flex-col">
                 <span className="text-xs text-muted-foreground">Productos</span>
                 <span className="font-bold">{biz.products ? biz.products.length : 0} activos</span>
-              </div>
-              {/* <div className="flex flex-col">
+              </div> */}
+                {/* <div className="flex flex-col">
                  <span className="text-xs text-muted-foreground">Impacto</span>
                  <span className="font-bold">4.8 <Star className="w-3 h-3 text-yellow-500 inline fill-current"/></span>
                </div> */}
+              </div>
+              <div className="flex gap-2 mt-2">
+                <Button variant="outline" size="sm" className="flex-1" asChild>
+                  <Link href={`/dashboard/businesses/${biz.id}`}><Edit className="w-4 h-4 mr-1" /> Administrar</Link>
+                </Button>
+                <Button variant="secondary" size="sm" asChild>
+                  <Link href={`/businesses/${biz.id}`} target="_blank"><Eye className="w-4 h-4" /></Link>
+                </Button>
+              </div>
             </div>
-            <div className="flex gap-2 mt-2">
-              <Button variant="outline" size="sm" className="flex-1" asChild>
-                <Link href={`/dashboard/businesses/${biz.id}`}><Edit className="w-4 h-4 mr-1" /> Administrar</Link>
-              </Button>
-              <Button variant="secondary" size="sm" asChild>
-                <Link href={`/businesses/${biz.id}`} target="_blank"><Eye className="w-4 h-4" /></Link>
-              </Button>
-            </div>
-          </div>
-        ))}
+          )))}
 
         {/* Create new business card placeholder */}
         {myBusinesses.length < 3 && (

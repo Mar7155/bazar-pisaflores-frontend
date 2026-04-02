@@ -6,6 +6,9 @@ import { getImageUrl } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import Image from "next/image";
+import { deleteBusinessAction } from "@/actions/mutations";
+import PauseBusinessButton from "@/components/dashboard/pause-business-button";
+import DeleteBusinessButton from "@/components/dashboard/delete-business-button";
 
 export default async function DashboardBusinessPage({
    params,
@@ -147,10 +150,16 @@ export default async function DashboardBusinessPage({
                </div>
             )}
 
-            <section className="flex justify-center items-center py-6 border-t border-border mt-4 gap-4">
-               <Button size="lg" variant="outline" className="border-yellow-500 text-yellow-600 hover:bg-yellow-50 hover:text-yellow-700 font-bold h-14 px-8 rounded-2xl" asChild>
+            <section className="flex flex-col md:flex-row justify-center items-center py-6 border-t border-border mt-4 gap-4">
+               <Button size="lg" variant="outline" className="border-yellow-500 text-yellow-600 hover:bg-yellow-50 hover:text-yellow-700 font-bold h-14 px-8 rounded-2xl w-full md:w-auto" asChild>
                   <Link href={`/dashboard/businesses/${business.id}/offers`}>Gestionar Ofertas</Link>
                </Button>
+               {business.is_active ? (
+                  <PauseBusinessButton businessId={business.id} />
+               ) : (
+                  <DeleteBusinessButton businessId={business.id} />
+               )
+               }
             </section>
          </div>
       </div>

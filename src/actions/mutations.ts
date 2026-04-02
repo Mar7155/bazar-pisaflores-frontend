@@ -15,6 +15,9 @@ import {
   setCoverImage,
   getPresignedUrl,
   confirmUpload,
+  deleteBusiness,
+  pauseBusiness,
+  activeBusiness,
 } from "@/lib/api";
 import {
   BusinessRegistrationFormValues,
@@ -49,7 +52,7 @@ export async function confirmUploadAction(
 ): Promise<{ error?: string }> {
   try {
     await confirmUpload(entityType, productId || businessId, s3Key, isCover);
-    
+
     // Revalidar las rutas correspondientes
     if (entityType === 'product' && productId) {
       revalidatePath(`/dashboard/businesses/${businessId}/products/${productId}`);
@@ -57,7 +60,7 @@ export async function confirmUploadAction(
       revalidatePath(`/dashboard/businesses/${businessId}/settings`);
     }
     revalidatePath(`/businesses/${businessId}`);
-    
+
     return {};
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Error al confirmar la subida.";
@@ -111,6 +114,52 @@ export async function updateSchedulesAction(
     const msg = e instanceof Error ? e.message : "Error al actualizar los horarios.";
     return { error: msg };
   }
+}
+
+export async function pauseBusinessAction(
+  bussinesId: string
+): Promise<{ error?: string }> {
+  try {
+    await pauseBusiness(bussinesId);
+    revalidatePath(`/dashboard/businesses/${bussinesId}`);
+    revalidatePath(`/businesses/${bussinesId}`);
+    revalidatePath("/dashboard");
+    revalidatePath("/businesses");
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "Error al pausar el negocio.";
+    return { error: msg };
+  }
+  redirect("/dashboard?status=paused");
+}
+
+export async function activeBusinessAction(
+  bussinesId: string
+): Promise<{ error?: string }> {
+  try {
+    await activeBusiness(bussinesId);
+    revalidatePath(`/dashboard/businesses/${bussinesId}`);
+    revalidatePath(`/businesses/${bussinesId}`);
+    revalidatePath("/dashboard");
+    revalidatePath("/businesses");
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "Error al activar el negocio.";
+    return { error: msg };
+  }
+  redirect("/dashboard?status=active");
+}
+
+export async function deleteBusinessAction(
+  bussinesId: string
+): Promise<{ error?: string }> {
+  try {
+    await deleteBusiness(bussinesId);
+    revalidatePath("/dashboard");
+    revalidatePath("/businesses");
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "Error al eliminar el negocio.";
+    return { error: msg };
+  }
+  redirect("/dashboard?status=deleted");
 }
 
 // -------------------------------------------------------
@@ -173,7 +222,7 @@ export async function deleteImageAction(
   productId: string | undefined, // undefined if it's for the business itself
   imageId: string,
   entityType: 'business' | 'product'
-): Promise<{ error?: string }> {
+): Promise<{ message?: string }> {
   try {
     await deleteImage(imageId, entityType);
     if (entityType === 'product' && productId) {
@@ -182,10 +231,10 @@ export async function deleteImageAction(
       revalidatePath(`/dashboard/businesses/${businessId}/settings`);
     }
     revalidatePath(`/businesses/${businessId}`);
-    return {};
+    return { message: "Imagen eliminada correctamente." };
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Error al eliminar la imagen.";
-    return { error: msg };
+    return { message: msg };
   }
 }
 
