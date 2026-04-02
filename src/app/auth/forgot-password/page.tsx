@@ -86,110 +86,111 @@ export default function ForgotPasswordPage() {
           <CardHeader className="space-y-1 text-center">
             <CardTitle className="text-2xl font-black">{step === "request" ? "Recuperar Contraseña" : "Crea tu Nueva Contraseña"}</CardTitle>
             <CardDescription className="text-md">
-              {step === "request" 
-                ? "Ingresa tu correo y te enviaremos instrucciones para restaurar tu acceso." 
+              {step === "request"
+                ? "Ingresa tu correo y te enviaremos instrucciones para restaurar tu acceso."
                 : "Captura el código que enviamos a tu bandeja y elige una nueva contraseña."}
             </CardDescription>
           </CardHeader>
-          
+
           <CardContent>
             {step === "request" && (
-                <form onSubmit={reqForm.handleSubmit(onRequestSubmit)} className="space-y-4 animate-fade-in">
+              <form onSubmit={reqForm.handleSubmit(onRequestSubmit)} className="space-y-4 animate-fade-in">
                 {serverError && (
                   <div className="bg-red-50 border border-red-200 text-red-600 p-3 rounded-md text-sm font-medium">
                     {serverError}
                   </div>
                 )}
                 <div className="space-y-2">
-                    <Label htmlFor="req-email">Correo electrónico</Label>
-                    <Input 
-                        id="req-email" 
-                        type="email" 
-                        placeholder="tu@correo.com" 
-                        {...reqForm.register("email")}
-                        className={reqForm.formState.errors.email ? "border-red-500 focus-visible:ring-red-500" : ""}
-                    />
-                    {reqForm.formState.errors.email && <p className="text-sm text-red-500 font-medium">{reqForm.formState.errors.email.message}</p>}
+                  <Label htmlFor="req-email">Correo electrónico</Label>
+                  <Input
+                    id="req-email"
+                    type="email"
+                    placeholder="tu@correo.com"
+                    {...reqForm.register("email")}
+                    className={reqForm.formState.errors.email ? "border-red-500 focus-visible:ring-red-500" : ""}
+                  />
+                  {reqForm.formState.errors.email && <p className="text-sm text-red-500 font-medium">{reqForm.formState.errors.email.message}</p>}
                 </div>
 
                 <Button type="submit" className="w-full mt-6 shadow-md" disabled={isSubmitting} size="lg">
-                    {isSubmitting ? (
+                  {isSubmitting ? (
                     <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Procesando...</>
-                    ) : (
+                  ) : (
                     <><MailCheck className="mr-2 h-4 w-4" /> Enviar Código</>
-                    )}
+                  )}
                 </Button>
-                </form>
+              </form>
             )}
 
             {step === "reset" && (
-                <form onSubmit={resetForm.handleSubmit(onResetSubmit)} className="space-y-6 animate-fade-in">
+              <form onSubmit={resetForm.handleSubmit(onResetSubmit)} className="space-y-6 animate-fade-in">
                 {serverError && (
                   <div className="bg-red-50 border border-red-200 text-red-600 p-3 rounded-md text-sm font-medium">
                     {serverError}
                   </div>
                 )}
                 <div className="space-y-2 flex flex-col items-center">
-                    <Label htmlFor="code" className="self-start">Código de Recuperación (Cognito)</Label>
-                    <Controller
+                  <Label htmlFor="code" className="self-start">Código de Recuperación (Cognito)</Label>
+                  <Controller
                     control={resetForm.control}
                     name="code"
                     render={({ field }) => (
-                        <InputOTP maxLength={6} {...field}>
+                      <InputOTP maxLength={6} {...field}>
                         <InputOTPGroup>
-                            <InputOTPSlot index={0} />
-                            <InputOTPSlot index={1} />
-                            <InputOTPSlot index={2} />
+                          <InputOTPSlot index={0} />
+                          <InputOTPSlot index={1} />
+                          <InputOTPSlot index={2} />
                         </InputOTPGroup>
                         <InputOTPSeparator />
                         <InputOTPGroup>
-                            <InputOTPSlot index={3} />
-                            <InputOTPSlot index={4} />
-                            <InputOTPSlot index={5} />
+                          <InputOTPSlot index={3} />
+                          <InputOTPSlot index={4} />
+                          <InputOTPSlot index={5} />
                         </InputOTPGroup>
-                        </InputOTP>
+                      </InputOTP>
                     )}
-                    />
-                    {resetForm.formState.errors.code && <p className="text-sm text-red-500 font-medium self-start">{resetForm.formState.errors.code.message}</p>}
+                  />
+                  {resetForm.formState.errors.code && <p className="text-sm text-red-500 font-medium self-start">{resetForm.formState.errors.code.message}</p>}
                 </div>
 
                 <div className="space-y-2">
-                    <Label htmlFor="newPassword">Nueva Contraseña</Label>
-                    <Input 
-                    id="newPassword" 
-                    type="password" 
-                    placeholder="••••••••" 
+                  <Label htmlFor="newPassword">Nueva Contraseña</Label>
+                  <Label htmlFor="newPassword" className="text-sm text-muted-foreground">Mínimo 8 caracteres, una mayúscula, un número y un caracter especial</Label>
+                  <Input
+                    id="newPassword"
+                    type="password"
+                    placeholder="*********"
                     {...resetForm.register("newPassword")}
                     className={resetForm.formState.errors.newPassword ? "border-red-500 focus-visible:ring-red-500" : ""}
-                    />
-                    {resetForm.formState.errors.newPassword && <p className="text-sm text-red-500 font-medium">{resetForm.formState.errors.newPassword.message}</p>}
+                  />
+                  {resetForm.formState.errors.newPassword && <p className="text-sm text-red-500 font-medium">{resetForm.formState.errors.newPassword.message}</p>}
                 </div>
 
                 <Button type="submit" className="w-full shadow-md" disabled={isSubmitting} size="lg">
-                    {isSubmitting ? (
+                  {isSubmitting ? (
                     <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Guardando...</>
-                    ) : (
+                  ) : (
                     "Guardar y Entrar"
-                    )}
+                  )}
                 </Button>
-                </form>
+              </form>
             )}
           </CardContent>
 
           {step === "request" && (
             <CardFooter className="flex justify-center text-sm text-muted-foreground pt-0 border-t border-border/50 py-4">
-                <Link href="/auth/login" className="hover:text-primary font-semibold text-foreground flex items-center">
-                    <ArrowLeft className="w-4 h-4 mr-1" /> Volver al Login
-                </Link>
+              <Link href="/auth/login" className="hover:text-primary font-semibold text-foreground flex items-center">
+                <ArrowLeft className="w-4 h-4 mr-1" /> Volver al Login
+              </Link>
             </CardFooter>
           )}
 
           {step === "reset" && (
             <CardFooter className="flex justify-center text-sm text-muted-foreground pt-0 border-t border-border/50 py-4 gap-2 text-center flex-col">
-                <p>Enviamos el código a <strong>{savedEmail}</strong></p>
-                <button type="button" onClick={() => setStep("request")} className="text-primary font-bold hover:underline">
-                    Cambiar correo
-                </button>
+              <p>Enviamos el código a <strong>{savedEmail}</strong></p>
+              <button type="button" onClick={() => setStep("request")} className="text-primary font-bold hover:underline">
+                Cambiar correo
+              </button>
             </CardFooter>
           )}
         </Card>
