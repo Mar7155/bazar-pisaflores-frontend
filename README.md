@@ -26,13 +26,13 @@ Crea `frontend/.env.local`:
 
 ```env
 # API Backend (AWS Lambda + API Gateway)
-NEXT_PUBLIC_API_URL=https://sun4e6qwxk.execute-api.mx-central-1.amazonaws.com/prod
+NEXT_PUBLIC_API_URL=
 
 # CDN para imágenes procesadas (CloudFront)
-NEXT_PUBLIC_CLOUDFRONT_URL=https://dfhxz8b92ecn8.cloudfront.net
+NEXT_PUBLIC_CLOUDFRONT_URL=
 
 # Modo mock — true usa datos en memoria, false usa la API real
-NEXT_PUBLIC_USE_MOCK=false
+NEXT_PUBLIC_USE_MOCK=true
 ```
 
 > Con `NEXT_PUBLIC_USE_MOCK=true` la app funciona completamente sin backend, útil para desarrollo de UI.

@@ -78,7 +78,7 @@ function ConfirmCodeForm() {
           <CardHeader className="space-y-1 text-center">
             <CardTitle className="text-2xl font-black">Verifica tu correo</CardTitle>
             <CardDescription className="text-md">
-              Ingresa el código de 6 dígitos que te enviamos via <span className="text-primary font-bold">Amazon Cognito</span>
+              Ingresa el código de 6 dígitos que te enviamos por <span className="text-primary font-bold">Correo</span>
             </CardDescription>
           </CardHeader>
           <CardContent>

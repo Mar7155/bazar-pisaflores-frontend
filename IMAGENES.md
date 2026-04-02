@@ -32,15 +32,6 @@ Browser                    Backend (Lambda)              S3 / CloudFront
 
 ---
 
-## Variables de entorno
-
-Agrega en `frontend/.env.local`:
-
-```env
-NEXT_PUBLIC_API_URL=https://sun4e6qwxk.execute-api.mx-central-1.amazonaws.com/prod
-NEXT_PUBLIC_CLOUDFRONT_URL=https://dfhxz8b92ecn8.cloudfront.net
-NEXT_PUBLIC_USE_MOCK=false
-```
 
 ---
 

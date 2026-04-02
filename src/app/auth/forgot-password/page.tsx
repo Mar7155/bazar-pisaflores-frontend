@@ -130,7 +130,7 @@ export default function ForgotPasswordPage() {
                   </div>
                 )}
                 <div className="space-y-2 flex flex-col items-center">
-                  <Label htmlFor="code" className="self-start">Código de Recuperación (Cognito)</Label>
+                  <Label htmlFor="code" className="self-start">Código de Recuperación</Label>
                   <Controller
                     control={resetForm.control}
                     name="code"
