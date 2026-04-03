@@ -68,7 +68,7 @@ export function useBusiness(id: string) {
 export function useFlashOffers(categoryId?: string) {
   return useQuery({
     queryKey: ["flash-offers", categoryId],
-    queryFn: () => getFlashOffers(categoryId),
+    queryFn: () => getFlashOffers({ categoryId }),
     staleTime: 60 * 1000, // 1 minuto
     refetchOnWindowFocus: true, // Siempre refrescar si vuelve a la pestaña
   });

@@ -28,7 +28,8 @@ export default async function SearchPage({
     queryFn: () => getBusinesses({ query: q, category_id: category })
   });
 
-  const results = await getBusinesses({ query: q, category_id: category });
+  const resultsResponse = await getBusinesses({ query: q, category_id: category });
+  const results = resultsResponse.data;
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
@@ -61,7 +62,7 @@ export default async function SearchPage({
                 {q ? `"${q}"` : category ? `Categoría: ${category}` : "Todas las búsquedas"}
               </span>
             </h1>
-            <p className="text-muted-foreground">{results.length} resultados encontrados</p>
+            <p className="text-muted-foreground">{resultsResponse.total} resultados encontrados</p>
           </div>
 
           {results.length > 0 ? (

@@ -2,15 +2,26 @@ import Link from "next/link";
 import { Store, Star, MapPin, Clock, Filter, ArrowRight, Search } from "lucide-react";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { getBusinesses, getCategories } from "@/lib/api";
 import { BusinessCard } from "@/components/business-card";
 import { getQueryClient } from "@/lib/get-query-client";
+import { PaginationBar } from "@/components/pagination-bar";
+
+const ITEMS_PER_PAGE = 12;
 
 export const metadata = {
   title: "Directorio de Negocios | Bazar Pisaflores",
   description: "Explora todos los negocios locales en Pisaflores.",
 };
+
+function buildPageUrl(currentCategory: string, query: string, page: number): string {
+  const params = new URLSearchParams();
+  if (currentCategory !== "all") params.set("category", currentCategory);
+  if (query) params.set("q", query);
+  if (page > 1) params.set("page", String(page));
+  const qs = params.toString();
+  return `/businesses${qs ? `?${qs}` : ""}`;
+}
 
 export default async function BusinessesPage({
   searchParams,
@@ -20,22 +31,26 @@ export default async function BusinessesPage({
   const resolvedParams = await searchParams;
   const currentCategory = typeof resolvedParams.category === 'string' ? resolvedParams.category : 'all';
   const query = typeof resolvedParams.q === 'string' ? resolvedParams.q : '';
+  const currentPage = typeof resolvedParams.page === 'string' ? Math.max(1, parseInt(resolvedParams.page, 10) || 1) : 1;
+  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
   const queryClient = getQueryClient();
 
-  // Prefetch data on the server to hydrate the client-side cache
   await Promise.all([
     queryClient.prefetchQuery({ queryKey: ["categories"], queryFn: getCategories }),
     queryClient.prefetchQuery({
-      queryKey: ["businesses", currentCategory, query],
-      queryFn: () => getBusinesses({ category_id: currentCategory, query })
+      queryKey: ["businesses", currentCategory, query, currentPage],
+      queryFn: () => getBusinesses({ category_id: currentCategory, query, limit: ITEMS_PER_PAGE, offset })
     }),
   ]);
 
-  const [categories, businesses] = await Promise.all([
+  const [categories, businessesResponse] = await Promise.all([
     getCategories(),
-    getBusinesses({ category_id: currentCategory, query })
+    getBusinesses({ category_id: currentCategory, query, limit: ITEMS_PER_PAGE, offset })
   ]);
+
+  const businesses = businessesResponse.data;
+  const totalPages = Math.max(1, Math.ceil(businessesResponse.total / ITEMS_PER_PAGE));
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
@@ -105,12 +120,11 @@ export default async function BusinessesPage({
           </div>
         )}
 
-        {/* Pagination Mock */}
-        {businesses.length > 0 && (
-          <div className="flex justify-center mt-8">
-            <Button variant="outline" className="w-full sm:w-auto">Cargar más negocios</Button>
-          </div>
-        )}
+        <PaginationBar
+          currentPage={currentPage}
+          totalPages={totalPages}
+          buildUrl={(page) => buildPageUrl(currentCategory, query, page)}
+        />
       </div>
     </HydrationBoundary>
   );

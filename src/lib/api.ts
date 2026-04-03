@@ -10,6 +10,16 @@
  */
 
 import { Business, Category, Product, FlashOffer, Schedule, BusinessImage, ProductImage } from "@/types";
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PAGINATED RESPONSE TYPE
+// ─────────────────────────────────────────────────────────────────────────────
+export interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
+  limit: number;
+  offset: number;
+}
 import {
   ProductRegistrationFormValues,
   BusinessRegistrationFormValues,
@@ -291,15 +301,22 @@ export async function getCategories(): Promise<Category[]> {
   return categoriesMock;
 }
 
-export async function getBusinesses(opts?: { category_id?: string; query?: string }): Promise<Business[]> {
+export async function getBusinesses(opts?: { category_id?: string; query?: string; limit?: number; offset?: number }): Promise<PaginatedResponse<Business>> {
+  const limit = opts?.limit ?? 20;
+  const offset = opts?.offset ?? 0;
+
   if (!USE_MOCK) {
     try {
       const params = new URLSearchParams();
       if (opts?.category_id && opts.category_id !== "all") params.append("categoryId", opts.category_id);
       if (opts?.query) params.append("q", opts.query);
-      const raw = await apiFetch<unknown>(`/businesses?${params.toString()}`);
-      return extractArray<unknown>(raw).map(normalizeBusiness);
-    } catch { return []; }
+      params.append("limit", String(limit));
+      params.append("offset", String(offset));
+      const raw = await apiFetch<any>(`/businesses?${params.toString()}`);
+      const data = extractArray<unknown>(raw).map(normalizeBusiness);
+      const total = typeof raw?.total === "number" ? raw.total : data.length;
+      return { data, total, limit, offset };
+    } catch { return { data: [], total: 0, limit, offset }; }
   }
   await sleep(100);
   let res = [...businessesMock];
@@ -308,7 +325,9 @@ export async function getBusinesses(opts?: { category_id?: string; query?: strin
     const q = opts.query.toLowerCase();
     res = res.filter(b => b.name.toLowerCase().includes(q) || b.description?.toLowerCase().includes(q));
   }
-  return res;
+  const total = res.length;
+  const paginated = res.slice(offset, offset + limit);
+  return { data: paginated, total, limit, offset };
 }
 
 export async function getBusinessById(id: string): Promise<Business | null> {
@@ -357,11 +376,17 @@ export async function getBusinessOffers(businessId: string): Promise<FlashOffer[
   return flashOffersMock.filter(o => o.business_id === businessId);
 }
 
-export async function getFlashOffers(categoryId?: string): Promise<FlashOffer[]> {
+export async function getFlashOffers(opts?: { categoryId?: string; limit?: number; offset?: number }): Promise<PaginatedResponse<FlashOffer>> {
+  const categoryId = opts?.categoryId;
+  const limit = opts?.limit ?? 12;
+  const offset = opts?.offset ?? 0;
+
   if (!USE_MOCK) {
     try {
-      // Backend endpoint is /flash-offers/active (no category filter in query)
-      const raw = await apiFetch<unknown>("/flash-offers/active");
+      const params = new URLSearchParams();
+      params.append("limit", String(limit));
+      params.append("offset", String(offset));
+      const raw = await apiFetch<any>(`/flash-offers/active?${params.toString()}`);
       let offers = extractArray<unknown>(raw).map(normalizeFlashOffer);
       // Filter by category client-side if needed (backend doesn't support this param)
       if (categoryId && categoryId !== "all") {
@@ -370,15 +395,18 @@ export async function getFlashOffers(categoryId?: string): Promise<FlashOffer[]>
           return biz?.category_id === categoryId;
         });
       }
-      return offers;
-    } catch { return []; }
+      const total = typeof raw?.total === "number" ? raw.total : offers.length;
+      return { data: offers, total, limit, offset };
+    } catch { return { data: [], total: 0, limit, offset }; }
   }
   await sleep(80);
   let res = flashOffersMock.filter(o => o.is_active && new Date(o.expires_at) > new Date());
   if (categoryId && categoryId !== "all") {
     res = res.filter(o => businessesMock.find(b => b.id === o.business_id)?.category_id === categoryId);
   }
-  return res;
+  const total = res.length;
+  const paginated = res.slice(offset, offset + limit);
+  return { data: paginated, total, limit, offset };
 }
 
 export async function getProducts(query: string): Promise<Product[]> {

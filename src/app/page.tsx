@@ -17,11 +17,14 @@ export default async function Home() {
     queryClient.prefetchQuery({ queryKey: ["flash-offers"], queryFn: () => getFlashOffers() }),
   ]);
 
-  const [businesses, flashOffers, categories] = await Promise.all([
-    getBusinesses(),
-    getFlashOffers(),
+  const [businessesResponse, flashOffersResponse, categories] = await Promise.all([
+    getBusinesses({ limit: 3 }),
+    getFlashOffers({ limit: 3 }),
     getCategories()
   ]);
+
+  const businesses = businessesResponse.data;
+  const flashOffers = flashOffersResponse.data;
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>

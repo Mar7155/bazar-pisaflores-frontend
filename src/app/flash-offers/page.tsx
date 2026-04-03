@@ -3,11 +3,22 @@ import { Clock, Store, ArrowRight, Flame, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { getCategories, getFlashOffers } from "@/lib/api";
+import { PaginationBar } from "@/components/pagination-bar";
+
+const ITEMS_PER_PAGE = 12;
 
 export const metadata = {
   title: "Ofertas Relámpago | Bazar Pisaflores",
   description: "Aprovecha descuentos únicos con tiempo límite en Pisaflores.",
 };
+
+function buildPageUrl(currentCategory: string, page: number): string {
+  const params = new URLSearchParams();
+  if (currentCategory !== "all") params.set("category", currentCategory);
+  if (page > 1) params.set("page", String(page));
+  const qs = params.toString();
+  return `/flash-offers${qs ? `?${qs}` : ""}`;
+}
 
 export default async function FlashOffersPage({
   searchParams,
@@ -16,14 +27,16 @@ export default async function FlashOffersPage({
 }) {
   const resolvedParams = await searchParams;
   const currentCategory = typeof resolvedParams.category === 'string' ? resolvedParams.category : "all";
+  const currentPage = typeof resolvedParams.page === 'string' ? Math.max(1, parseInt(resolvedParams.page, 10) || 1) : 1;
+  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
-  const [categories, offers] = await Promise.all([
+  const [categories, offersResponse] = await Promise.all([
     getCategories(),
-    getFlashOffers(currentCategory),
+    getFlashOffers({ categoryId: currentCategory, limit: ITEMS_PER_PAGE, offset }),
   ]);
 
-  // Filter out definitely expired offers for public viewing
-  const activeOffersList = offers.filter(o => o.is_active && new Date(o.expires_at) > new Date());
+  const activeOffersList = offersResponse.data.filter(o => o.is_active && new Date(o.expires_at) > new Date());
+  const totalPages = Math.max(1, Math.ceil(offersResponse.total / ITEMS_PER_PAGE));
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl flex flex-col gap-8 flex-1">
@@ -78,8 +91,6 @@ export default async function FlashOffersPage({
           {activeOffersList.map((offer) => (
             <Card key={offer.id} className="overflow-hidden hover:-translate-y-1 transition-transform duration-300 shadow-sm hover:shadow-md border-accent/20 flex flex-col">
               <div className="flex flex-col items-center justify-center relative">
-                {/* <div className="h-40 md:h-48 bg-muted relative flex flex-col items-center justify-center">
-                 <span className="text-muted-foreground font-medium text-sm">Foto Oferta</span> */}
                 {offer.discount_pct && (
                   <div className="absolute top-3 right-3 bg-red-500 text-white font-black px-3 py-1.5 rounded-full shadow-lg text-sm flex items-center gap-1">
                     <Flame className="w-4 h-4" /> -{offer.discount_pct}%
@@ -111,6 +122,12 @@ export default async function FlashOffersPage({
           ))}
         </div>
       )}
+
+      <PaginationBar
+        currentPage={currentPage}
+        totalPages={totalPages}
+        buildUrl={(page) => buildPageUrl(currentCategory, page)}
+      />
     </div>
   );
 }
