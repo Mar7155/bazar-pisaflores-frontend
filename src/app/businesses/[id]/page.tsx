@@ -16,7 +16,6 @@ export default async function BusinessProfile({
 }) {
   const { id } = await params;
   const business = await getBusinessById(id);
-  console.log(business);
   // Cargar productos con sus imagenes en paralelo usando el endpoint que incluye images[]
   const productsBasic = await getProductsByBusinessId(id);
   const products = await Promise.all(

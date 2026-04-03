@@ -12,8 +12,6 @@ export function BecomeOwnerCTA() {
 
   const handleUpgrade = async () => {
     setIsSubmitting(true);
-    // Simulate API POST /auth/become-owner
-    console.log("Upgrading role: POST /auth/become-owner");
     await upgradeRoleAction();
   };
 

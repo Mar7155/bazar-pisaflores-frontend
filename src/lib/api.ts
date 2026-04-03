@@ -284,7 +284,6 @@ export async function getCategories(): Promise<Category[]> {
   if (!USE_MOCK) {
     try {
       const raw = await apiFetch<unknown>("/categories");
-      console.log(raw);
       return extractArray<unknown>(raw).map(normalizeCategory);
     } catch { return []; }
   }
@@ -340,7 +339,6 @@ export async function getOwnerBusinesses(): Promise<Business[]> {
   if (!USE_MOCK) {
     try {
       const raw = await apiFetch<unknown>("/auth/me/businesses");
-      console.log(raw);
       return extractArray<unknown>(raw, "data").map(normalizeBusiness);
     } catch { return []; }
   }

@@ -21,7 +21,6 @@ export default async function DashboardBusinessPage({
    const products = await Promise.all(
       productsBasic.map(p => getBusinessProductById(id, p.id).then(full => full ?? p))
    );
-   console.log(products);
 
    if (!business) {
       notFound();

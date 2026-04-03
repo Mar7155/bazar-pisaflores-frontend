@@ -37,8 +37,6 @@ export default async function BusinessesPage({
     getBusinesses({ category_id: currentCategory, query })
   ]);
 
-  console.log(businesses);
-
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <div className="container mx-auto px-4 py-8 max-w-7xl flex flex-col gap-8 flex-1 animate-slide-up opacity-0">
