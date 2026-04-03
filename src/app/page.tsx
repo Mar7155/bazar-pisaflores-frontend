@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { getBusinesses, getFlashOffers, getCategories } from "@/lib/api";
 import { getQueryClient } from "@/lib/get-query-client";
 import { FlashOfferCard } from "@/components/dashboard/flash-offer-card";
+import { BusinessCard } from "@/components/business-card";
 
 export default async function Home() {
   const queryClient = getQueryClient();
@@ -70,45 +71,9 @@ export default async function Home() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-            {businesses.slice(0, 3).map((biz) => {
-              const isOpen = biz.schedules && biz.schedules.length > 0 && !biz.schedules[0].is_closed;
-
-              return (
-                <Card key={biz.id} className="overflow-hidden hover:border-primary/50 transition-colors group text-card-foreground">
-                  <div className="h-40 md:h-48 bg-muted relative">
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                    <div className="absolute bottom-3 left-4 flex gap-2">
-                      {biz.category && (
-                        <span className="bg-primary text-primary-foreground text-xs font-bold px-2 py-1 rounded">
-                          {biz.category.name}
-                        </span>
-                      )}
-                      <span className={`text-white text-xs font-bold px-2 py-1 rounded flex items-center gap-1 ${isOpen ? "bg-green-500" : "bg-red-500"}`}>
-                        <Clock className="w-3 h-3" /> {isOpen ? "Abierto" : "Cerrado"}
-                      </span>
-                    </div>
-                  </div>
-                  <CardContent className="p-5">
-                    <Link href={`/businesses/${biz.id}`} className="hover:underline">
-                      <h3 className="font-bold text-xl mb-1 text-foreground group-hover:text-primary transition-colors line-clamp-1">
-                        {biz.name}
-                      </h3>
-                    </Link>
-                    <div className="flex items-center gap-1 text-sm text-muted-foreground mb-3">
-                      <MapPin className="w-4 h-4 shrink-0" /> <span className="truncate">{biz.address || "Pisaflores"}</span>
-                    </div>
-                    <div className="flex items-center justify-between pt-3 border-t border-border mt-1">
-                      {/* <div className="flex items-center gap-1 text-sm font-medium text-yellow-600 dark:text-yellow-400">
-                        <Star className="w-4 h-4 fill-current" /> 4.8 (120)
-                      </div> */}
-                      <Button variant="secondary" size="sm" asChild>
-                        <Link href={`/businesses/${biz.id}`}>Ver menú</Link>
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              )
-            })}
+            {businesses.map((biz) => (
+              <BusinessCard key={biz.id} business={biz} />
+            ))}
           </div>
 
           <div className="mt-6 sm:hidden flex justify-center w-full">
