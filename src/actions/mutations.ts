@@ -222,7 +222,7 @@ export async function deleteImageAction(
   productId: string | undefined, // undefined if it's for the business itself
   imageId: string,
   entityType: 'business' | 'product'
-): Promise<{ message?: string }> {
+): Promise<{ error?: string }> {
   try {
     await deleteImage(imageId, entityType);
     if (entityType === 'product' && productId) {
@@ -231,10 +231,10 @@ export async function deleteImageAction(
       revalidatePath(`/dashboard/businesses/${businessId}/settings`);
     }
     revalidatePath(`/businesses/${businessId}`);
-    return { message: "Imagen eliminada correctamente." };
+    return {};
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Error al eliminar la imagen.";
-    return { message: msg };
+    return { error: msg };
   }
 }
 

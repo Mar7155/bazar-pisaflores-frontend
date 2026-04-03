@@ -89,9 +89,9 @@ export function MediaManager({
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   />
 
-                  {/* Glassmorphism Controls Overlay */}
-                  <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col justify-between p-3">
-                    <div className="flex justify-end items-start translate-y-[-10px] group-hover:translate-y-0 transition-transform">
+                  {/* Actions Overlay - Now always visible for better UX */}
+                  <div className="absolute inset-0 flex flex-col justify-between p-2 pointer-events-none">
+                    <div className="flex justify-end pointer-events-auto">
                       <DeleteImageButton
                         businessId={businessId}
                         productId={entityType === 'product' ? entityId : undefined}
@@ -102,24 +102,26 @@ export function MediaManager({
                     </div>
 
                     {!img.is_cover && (
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        className="w-full h-10 text-[10px] font-black uppercase tracking-widest rounded-xl gap-2 bg-white/90 shadow-lg hover:bg-white translate-y-[10px] group-hover:translate-y-0 transition-transform"
-                        onClick={() => handleSetCover(img.id)}
-                      >
-                        <Star className="w-4 h-4 fill-yellow-500 text-yellow-500" /> Usar como Portada
-                      </Button>
+                      <div className="pointer-events-auto">
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          className="w-full h-8 text-[9px] font-black uppercase tracking-widest rounded-lg gap-2  shadow-md border border-border/50 text-foreground"
+                          onClick={() => handleSetCover(img.id)}
+                        >
+                          Portada
+                        </Button>
+                      </div>
                     )}
                   </div>
 
                   {img.is_cover && (
-                    <div className="absolute top-3 left-3 bg-yellow-500 text-white text-[10px] font-black px-3 py-1.5 rounded-full flex items-center gap-2 shadow-lg animate-fade-in border border-yellow-400">
-                      <Star className="w-3.5 h-3.5 fill-current" /> PORTADA
+                    <div className="absolute top-2 left-2 bg-yellow-500 text-white text-[9px] font-black px-2 py-1 rounded-lg flex items-center gap-1.5 shadow-lg border border-yellow-400">
+                      <Star className="w-3 h-3 fill-current" /> PORTADA
                     </div>
                   )}
 
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none opacity-60" />
                 </div>
               ))}
             </div>

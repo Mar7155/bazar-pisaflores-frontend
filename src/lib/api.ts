@@ -196,6 +196,7 @@ function normalizeBusiness(raw: any): Business {
     is_active: raw.isActive ?? raw.is_active ?? true,
     created_at: raw.createdAt ?? raw.created_at,
     updated_at: raw.updatedAt ?? raw.updated_at,
+    coverImage: raw.coverImage ?? raw.cover_image ?? null,
     // Relationships
     category: raw.category
       ? normalizeCategory(raw.category)

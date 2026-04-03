@@ -1,4 +1,4 @@
-import { Clock, MapPin, Search, MessageCircle, Star, ShoppingBag, Store, Flame } from "lucide-react";
+import { Clock, MapPin, Search, MessageCircle, Star, ShoppingBag, Store, Flame, ImageIcon } from "lucide-react";
 import Link from "next/link";
 import { getBusinessById, getProductsByBusinessId, getBusinessProductById } from "@/lib/api";
 import { getImageUrl } from "@/lib/utils";
@@ -16,41 +16,39 @@ export default async function BusinessProfile({
 }) {
   const { id } = await params;
   const business = await getBusinessById(id);
-
+  console.log(business);
   // Cargar productos con sus imagenes en paralelo usando el endpoint que incluye images[]
   const productsBasic = await getProductsByBusinessId(id);
   const products = await Promise.all(
     productsBasic.map(p => getBusinessProductById(id, p.id).then(full => full ?? p))
   );
 
-  console.log(products);
-
   if (!business) {
     notFound();
   }
 
   // Calculate if currently open based on today's schedule
-  const today = new Date().getDay(); // 0 is Sunday
+  const today = new Date().getDay();
   const todaySchedule = business.schedules?.find(s => s.day_of_week === today);
   const isOpen = todaySchedule && !todaySchedule.is_closed;
+  const coverImage = business.images?.find(img => img.is_cover);
 
   return (
     <section className="w-full bg-muted/10 min-h-screen">
       {/* Cover Image & Header - Using min-h and flex to prevent overlap with sticky navbar */}
       <div className="relative w-full min-h-[320px] md:min-h-[400px] bg-zinc-200 dark:bg-zinc-800 flex flex-col justify-end overflow-hidden">
-        {/* 
-        <Image
-          src={getImageUrl(business.images?.find(img => img.is_cover)?.s3_key || business.images?.[0]?.s3_key, 'lg')}
-          alt={business.name}
-          fill
-          className="object-cover transition-opacity duration-700 hover:scale-105 blur-xs"
-          priority
-          sizes="100vw"
-        /> 
-        */}
-
-        {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent z-10" />
+        {coverImage ? (
+          <Image
+            src={getImageUrl(coverImage.s3_key, 'lg')}
+            alt={business.name}
+            fill
+            className="object-cover transition-opacity duration-700 hover:scale-105 blur-xs"
+            priority
+            sizes="100vw"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent z-10" />
+        )}
 
         {/* Header Content Wrapper */}
         <div className="relative z-20 w-full px-4 pb-8 md:pb-12 pt-24">
@@ -126,6 +124,45 @@ export default async function BusinessProfile({
               </div>
             </div>
           </div>
+
+          {/* Business Gallery Carousel */}
+          {business.images && business.images.length > 0 && (
+            <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
+              <div className="p-4 border-b border-border/50">
+                <h3 className="font-bold text-lg text-foreground flex items-center gap-2">
+                  <ImageIcon className="w-5 h-5 text-primary" /> Galería
+                </h3>
+              </div>
+              <div className="p-4">
+                <Carousel className="w-full">
+                  <CarouselContent>
+                    {business.images.map((img, idx) => (
+                      <CarouselItem key={img.id}>
+                        <div className="w-full aspect-[4/3] rounded-xl overflow-hidden relative bg-muted">
+                          <Image
+                            src={getImageUrl(img.s3_key, 'md')}
+                            alt={`${business.name} - Foto ${idx + 1}`}
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 1024px) 100vw, 33vw"
+                          />
+                        </div>
+                      </CarouselItem>
+                    ))}
+                  </CarouselContent>
+                  {business.images.length > 1 && (
+                    <>
+                      <CarouselPrevious className="left-2 border-white/50 bg-white/80 hover:bg-white shadow-md" />
+                      <CarouselNext className="right-2 border-white/50 bg-white/80 hover:bg-white shadow-md" />
+                    </>
+                  )}
+                </Carousel>
+                <p className="text-xs text-muted-foreground text-center mt-3 font-medium">
+                  {business.images.length} {business.images.length === 1 ? 'foto' : 'fotos'}
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Tags */}
           {/* Aun no está implementado en el backend se implementara despues

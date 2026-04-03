@@ -33,6 +33,7 @@ export interface Business {
   updated_at: string;
 
   // Custom frontend relationships (useful for nesting)
+  coverImage?: string;
   category?: Category | null;
   images?: BusinessImage[];
   schedules?: Schedule[];
