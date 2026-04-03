@@ -106,7 +106,7 @@ export function Navbar() {
             className="rounded-full"
           >
             {mounted ? (
-              theme === "dark" ? <Sun className="w-5 h-5 text-yellow-400" /> : <Moon className="w-5 h-5 text-primary-foreground" />
+              theme === "dark" ? <Sun className="w-5 h-5 text-yellow-400" /> : <Moon className="w-5 h-5 text-secondary-foreground" />
             ) : (
               <span className="w-5 h-5" /> // Placeholder to avoid layout shift
             )}
@@ -124,7 +124,7 @@ export function Navbar() {
             className="rounded-full"
           >
             {mounted ? (
-              theme === "dark" ? <Sun className="w-5 h-5 text-yellow-400" /> : <Moon className="w-5 h-5 text-primary-foreground" />
+              theme === "dark" ? <Sun className="w-5 h-5 text-yellow-400" /> : <Moon className="w-5 h-5 text-secondary-foreground" />
             ) : (
               <span className="w-5 h-5" />
             )}
