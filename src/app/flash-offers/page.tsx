@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { Clock, Store, ArrowRight, Flame, Tag } from "lucide-react";
+import { Clock, Store, ArrowRight, Flame } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { getCategories, getFlashOffers } from "@/lib/api";
 import { PaginationBar } from "@/components/pagination-bar";
+import { CategoryFilter } from "@/components/search-filters";
 
 const ITEMS_PER_PAGE = 12;
 
@@ -52,28 +53,13 @@ export default async function FlashOffersPage({
         </p>
       </div>
 
-      <div className="flex overflow-x-auto pb-4 no-scrollbar gap-2 mb-2 items-center">
-        <span className="text-sm font-bold text-muted-foreground mr-2 shrink-0 flex items-center gap-1"><Tag className="w-4 h-4" /> Filtrar:</span>
-        <Button
-          asChild
-          variant={currentCategory === "all" ? "default" : "outline"}
-          size="sm"
-          className="shrink-0 rounded-full"
-        >
-          <Link href="/flash-offers">Todas</Link>
-        </Button>
-        {categories.map((cat) => (
-          <Button
-            asChild
-            key={cat.id}
-            variant={currentCategory === cat.id ? "default" : "outline"}
-            size="sm"
-            className="shrink-0 rounded-full"
-          >
-            <Link href={`/flash-offers?category=${cat.id}`}>{cat.name}</Link>
-          </Button>
-        ))}
-      </div>
+      <CategoryFilter
+        categories={categories}
+        currentCategory={currentCategory}
+        basePath="/flash-offers"
+        labelStyle="tag"
+        allLabel="Todas"
+      />
 
       {activeOffersList.length === 0 ? (
         <div className="py-20 text-center flex flex-col items-center gap-4 bg-muted/10 rounded-2xl border border-dashed border-border">

@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { Search, Store, Frown, MapPin, Star, ArrowRight } from "lucide-react";
+import { Store, Frown, MapPin, ArrowRight } from "lucide-react";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { getBusinesses } from "@/lib/api";
 import { getQueryClient } from "@/lib/get-query-client";
+import { SearchBar } from "@/components/search-filters";
 
 export const metadata = {
   title: "Búsqueda | Bazar Pisaflores",
@@ -19,7 +20,7 @@ export default async function SearchPage({
   const resolvedParams = await searchParams;
   const q = typeof resolvedParams.q === 'string' ? resolvedParams.q : '';
   const category = typeof resolvedParams.category === 'string' ? resolvedParams.category : '';
-  
+
   const queryClient = getQueryClient();
 
   // Prefetch search results
@@ -34,30 +35,22 @@ export default async function SearchPage({
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <div className="container mx-auto px-4 py-8 max-w-7xl flex flex-col gap-8 flex-1 animate-slide-up opacity-0 text-balance">
-        
-        {/* Search Header Form */}
-        <div className="bg-card border border-border rounded-3xl p-6 md:p-8 shadow-sm">
-          <form className="flex flex-col md:flex-row gap-4 max-w-3xl mx-auto">
-            <div className="relative flex-1">
-              <input 
-                type="text" 
-                name="q"
-                defaultValue={q}
-                placeholder="Buscar negocios..." 
-                className="w-full pl-12 pr-4 py-3 md:py-4 rounded-full bg-background border border-border shadow-inner focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-base md:text-lg font-medium text-card-foreground"
-              />
-              <Search className="w-6 h-6 text-muted-foreground absolute left-4 top-1/2 -translate-y-1/2" />
-            </div>
-            <Button type="submit" size="lg" className="rounded-full px-8 h-auto py-3 md:py-4 text-base font-bold shrink-0 shadow-md">
-              Buscar
-            </Button>
-          </form>
+
+        {/* Search Header */}
+        <div className="bg-card border border-border rounded-3xl p-6 md:p-8 shadow-sm flex justify-center">
+          <SearchBar
+            action="/search"
+            defaultValue={q}
+            placeholder="Buscar negocios..."
+            hiddenFields={category ? { category } : undefined}
+          />
         </div>
+
 
         <div className="flex flex-col gap-6">
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
-              Resultados para: 
+              Resultados para:
               <span className="text-primary italic">
                 {q ? `"${q}"` : category ? `Categoría: ${category}` : "Todas las búsquedas"}
               </span>
@@ -71,7 +64,7 @@ export default async function SearchPage({
                 <Card key={biz.id} className="overflow-hidden hover:border-primary/50 transition-colors group text-card-foreground relative">
                   <CardContent className="p-0 flex flex-col md:flex-row h-auto md:h-40">
                     <div className="w-full md:w-40 h-40 bg-muted shrink-0 relative">
-                       <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent md:bg-gradient-to-r" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent md:bg-gradient-to-r" />
                     </div>
                     <div className="p-4 flex flex-col flex-1 justify-center">
                       <Link href={`/businesses/${biz.id}`} className="hover:underline">

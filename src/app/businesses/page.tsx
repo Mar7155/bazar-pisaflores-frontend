@@ -1,11 +1,10 @@
-import Link from "next/link";
-import { Store, Star, MapPin, Clock, Filter, ArrowRight, Search } from "lucide-react";
+import { Store } from "lucide-react";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
 import { getBusinesses, getCategories } from "@/lib/api";
 import { BusinessCard } from "@/components/business-card";
 import { getQueryClient } from "@/lib/get-query-client";
 import { PaginationBar } from "@/components/pagination-bar";
+import { CategoryFilter, SearchBar } from "@/components/search-filters";
 
 const ITEMS_PER_PAGE = 12;
 
@@ -67,45 +66,20 @@ export default async function BusinessesPage({
               </p>
             </div>
 
-            <form action="/businesses" className="relative w-full md:w-80 shrink-0 text-card-foreground">
-              {currentCategory !== 'all' && <input type="hidden" name="category" value={currentCategory} />}
-              <input
-                type="text"
-                name="q"
-                defaultValue={query}
-                placeholder="Buscar negocio..."
-                className="w-full pl-10 pr-4 py-2.5 rounded-full bg-card border border-border shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm"
-              />
-              <button type="submit" className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors">
-                <Search className="w-5 h-5" />
-              </button>
-            </form>
+            <SearchBar
+              action="/businesses"
+              defaultValue={query}
+              placeholder="Buscar negocio..."
+              hiddenFields={currentCategory !== "all" ? { category: currentCategory } : undefined}
+            />
           </div>
 
-          <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar w-full">
-            <Button variant="outline" size="sm" className="shrink-0 gap-2 pointer-events-none">
-              <Filter className="w-4 h-4" /> Filtros
-            </Button>
-            <Button
-              variant={currentCategory === "all" ? "default" : "secondary"}
-              size="sm"
-              className="shrink-0 rounded-full"
-              asChild
-            >
-              <Link href="/businesses?category=all">Todos</Link>
-            </Button>
-            {categories.map((cat) => (
-              <Button
-                key={cat.id}
-                variant={currentCategory === cat.id ? "default" : "secondary"}
-                size="sm"
-                className="shrink-0 rounded-full"
-                asChild
-              >
-                <Link href={`/businesses?category=${cat.id}`}>{cat.name}</Link>
-              </Button>
-            ))}
-          </div>
+          <CategoryFilter
+            categories={categories}
+            currentCategory={currentCategory}
+            basePath="/businesses"
+            query={query}
+          />
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
