@@ -13,19 +13,9 @@ interface BusinessCardProps {
 }
 
 export function BusinessCard({ business }: BusinessCardProps) {
-  const now = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Mexico_City" }));
-  const today = now.getDay(); // 0 = Sunday
+  const today = new Date().getDay();
   const todaySchedule = business.schedules?.find(s => s.day_of_week === today);
-
-  let isOpen = false;
-  if (todaySchedule && !todaySchedule.is_closed) {
-    const currentMinutes = now.getHours() * 60 + now.getMinutes();
-    const [openH, openM] = todaySchedule.opens_at.split(":").map(Number);
-    const [closeH, closeM] = todaySchedule.closes_at.split(":").map(Number);
-    const opensAt = openH * 60 + openM;
-    const closesAt = closeH * 60 + closeM;
-    isOpen = currentMinutes >= opensAt && currentMinutes < closesAt;
-  }
+  const isOpen = todaySchedule && !todaySchedule.is_closed;
 
   return (
     <Card className="overflow-hidden hover:border-primary/50 transition-colors group text-card-foreground flex flex-col h-full shadow-sm">
