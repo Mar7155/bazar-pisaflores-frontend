@@ -1,14 +1,14 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Store, Plus, PackageOpen, Eye, MapPin, Tag, ArrowLeft, Zap, ChevronRight } from "lucide-react";
-import { getBusinessById, getBusinessProductById, getProductsByBusinessId } from "@/lib/api";
+import { getBusinessProductById, getOwnerBusinessesById, getProductsByBusinessId } from "@/lib/api";
 import { getImageUrl } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import Image from "next/image";
-import { deleteBusinessAction } from "@/actions/mutations";
 import PauseBusinessButton from "@/components/dashboard/pause-business-button";
 import DeleteBusinessButton from "@/components/dashboard/delete-business-button";
+import ActiveBusinessButton from "@/components/dashboard/active-business-button";
 
 export default async function DashboardBusinessPage({
    params,
@@ -16,7 +16,7 @@ export default async function DashboardBusinessPage({
    params: Promise<{ id: string }>;
 }) {
    const { id } = await params;
-   const business = await getBusinessById(id);
+   const business = await getOwnerBusinessesById(id);
    const productsBasic = await getProductsByBusinessId(id);
    const products = await Promise.all(
       productsBasic.map(p => getBusinessProductById(id, p.id).then(full => full ?? p))
@@ -156,7 +156,10 @@ export default async function DashboardBusinessPage({
                {business.is_active ? (
                   <PauseBusinessButton businessId={business.id} />
                ) : (
-                  <DeleteBusinessButton businessId={business.id} />
+                  <div className="flex w-full gap-2">
+                     {/* <DeleteBusinessButton businessId={business.id} /> */}
+                     <ActiveBusinessButton businessId={business.id} />
+                  </div>
                )
                }
             </section>

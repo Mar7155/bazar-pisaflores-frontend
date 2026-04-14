@@ -93,7 +93,7 @@ export function DashboardClientContent({ status }: { status: string | null }) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
         {myBusinesses.map((biz) => (
-          biz.is_active && (
+          biz && (
             <BusinessDashboardCard key={biz.id} business={biz} />
           )
         ))}

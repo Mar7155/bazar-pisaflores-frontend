@@ -365,6 +365,17 @@ export async function getOwnerBusinesses(): Promise<Business[]> {
   return businessesMock.filter(b => b.owner_id === "user-1");
 }
 
+export async function getOwnerBusinessesById(id: string): Promise<Business | null> {
+  if (!USE_MOCK) {
+    try {
+      const raw = await apiFetch<unknown>(`/auth/me/businesses/${id}`);
+      return normalizeBusiness(raw);
+    } catch { return null; }
+  }
+  await sleep(80);
+  return businessesMock.find(b => b.id === id) || null;
+}
+
 export async function getBusinessOffers(businessId: string): Promise<FlashOffer[]> {
   if (!USE_MOCK) {
     try {

@@ -1,30 +1,30 @@
 "use client"
 
-import { deleteBusinessAction } from "@/actions/mutations";
+import { activeBusinessAction } from "@/actions/mutations";
 import { Button } from "../ui/button";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 
-export default function DeleteBusinessButton({ businessId }: { businessId: string }) {
+export default function ActiveBusinessButton({ businessId }: { businessId: string }) {
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <Button size="lg" variant="destructive" className="font-bold h-14 px-8 rounded-2xl w-full md:w-auto" >
-                    Eliminar Negocio
+                <Button size="lg" variant="default" className="font-bold h-14 px-8 rounded-2xl w-full md:w-auto" >
+                    Activar Negocio
                 </Button>
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Eliminar Negocio</DialogTitle>
+                    <DialogTitle>Activar Negocio</DialogTitle>
                     <DialogDescription>
-                        ¿Estás seguro de que quieres eliminar este negocio?
+                        ¿Estás seguro de que quieres activar este negocio?
                     </DialogDescription>
                 </DialogHeader>
                 <DialogFooter className="flex flex-col gap-4">
                     <DialogClose asChild>
                         <Button variant="outline">Cancelar</Button>
                     </DialogClose>
-                    <Button size="lg" variant="destructive" onClick={() => deleteBusinessAction(businessId)} className="font-bold h-14 px-8 rounded-2xl w-full md:w-auto" >
-                        Eliminar Negocio
+                    <Button size="lg" variant="default" onClick={() => activeBusinessAction(businessId)} className="font-bold h-14 px-8 rounded-2xl w-full md:w-auto" >
+                        Activar Negocio
                     </Button>
                 </DialogFooter>
             </DialogContent>
