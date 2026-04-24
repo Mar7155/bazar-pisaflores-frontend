@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { Store, UserCircle, LogOut, Settings, PackageOpen } from "lucide-react";
-import BackButton from "@/components/dashboard/back-button";
 
 export default function DashboardLayout({
   children,
@@ -42,12 +41,6 @@ export default function DashboardLayout({
       {/* Main Content Area */}
       <main className="flex-1 w-full relative">
         {/* Mobile Header Sub-nav */}
-        <div className="md:hidden flex items-center justify-between p-4 bg-background border-b border-border shadow-sm">
-          <Link href="/" className="flex items-center gap-2 font-bold text-lg">
-            <Store className="w-5 h-5 text-primary" /> Mi Panel
-          </Link>
-          <BackButton />
-        </div>
 
         <div className="p-6 md:p-10 container max-w-5xl mx-auto h-full overflow-y-auto animate-fade-in relative z-10">
           {children}

@@ -31,9 +31,9 @@ export default async function BusinessProductsPage({
 
   return (
     <div className="flex flex-col gap-8 animate-fade-in max-w-5xl mx-auto pb-12">
-      {/* breadcrumb-ish Header */}
+      {/* breadcrumb-ish Header */}S
       <div className="flex items-center gap-4 border-b border-border/50 pb-6">
-        <BackButton />
+        <BackButton businessId={businessId} />
         <div className="flex flex-col">
           <h1 className="text-3xl font-black tracking-tight text-foreground flex items-center gap-2">
             <PackageOpen className="w-8 h-8 text-primary" /> Inventario Completo
@@ -71,8 +71,8 @@ export default async function BusinessProductsPage({
                 {/* Product Info */}
                 <div className="flex items-center gap-6 w-full">
                   <div className="w-24 h-24 bg-muted rounded-xl shrink-0 overflow-hidden border border-border relative flex items-center justify-center">
-                    <img 
-                      src={getImageUrl(prod.images?.[0]?.s3_key, 'sm')} 
+                    <img
+                      src={getImageUrl(prod.images?.[0]?.s3_key, 'sm')}
                       alt={prod.name}
                       className="w-full h-full object-cover"
                     />

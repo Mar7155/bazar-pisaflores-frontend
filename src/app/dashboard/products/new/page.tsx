@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import BackButton from "@/components/dashboard/back-button";
 
 function NewProductForm() {
   const searchParams = useSearchParams();
@@ -54,6 +55,7 @@ function NewProductForm() {
            <h1 className="text-3xl font-black text-foreground tracking-tight">Nuevo Producto</h1>
            <p className="text-muted-foreground font-medium">Añade un artículo o servicio a tu inventario.</p>
         </div>
+        <BackButton businessId={businessId} />
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">

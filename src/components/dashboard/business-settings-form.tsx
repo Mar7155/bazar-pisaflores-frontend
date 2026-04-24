@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-   ArrowLeft, Clock, Save, Loader2, Store, Phone, MapPin,
+   Save, Loader2, Store, Phone, MapPin,
    Settings, ChevronRight, AlertCircle, CheckCircle2
 } from "lucide-react";
 import { useForm, useFieldArray } from "react-hook-form";
@@ -24,6 +24,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { appToast } from "@/lib/toast";
 import { Business, Category } from "@/types";
 import { MediaManager } from "./media-manager";
+import BackButton from "./back-button";
 
 const DAYS_ES = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
 
@@ -115,6 +116,9 @@ export function BusinessSettingsForm({ business, categories, id }: BusinessSetti
                   <p className="text-muted-foreground font-medium flex items-center gap-1">
                      Administra tu negocio <ChevronRight className="w-4 h-4" /> <span className="text-primary">{infoForm.getValues("name")}</span>
                   </p>
+               </div>
+               <div>
+                  <BackButton businessId={id} />
                </div>
             </div>
          </div>
@@ -235,8 +239,8 @@ export function BusinessSettingsForm({ business, categories, id }: BusinessSetti
                <div className="w-1.5 h-6 bg-yellow-500 rounded-full shadow-sm shadow-yellow-500/20" />
                <h2 className="text-xl font-bold tracking-tight">Galería de Imágenes</h2>
             </div>
-            
-            <MediaManager 
+
+            <MediaManager
                entityType="business"
                entityId={id}
                businessId={id}

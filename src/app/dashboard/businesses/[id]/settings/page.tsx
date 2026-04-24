@@ -8,7 +8,7 @@ export default async function BusinessSettingsPage({
    params: Promise<{ id: string }>;
 }) {
    const { id } = await params;
-   
+
    // Fetch data on the server - no CORS issues here
    const business = await getBusinessById(id);
    const categories = await getCategories();
