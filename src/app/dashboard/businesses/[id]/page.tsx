@@ -18,9 +18,10 @@ export default async function DashboardBusinessPage({
    const { id } = await params;
    const business = await getOwnerBusinessesById(id);
    const productsBasic = await getProductsByBusinessId(id);
+   const featuredProductsBasic = productsBasic.slice(0, 3);
    const products = await Promise.all(
-      productsBasic.map(p => getBusinessProductById(id, p.id).then(full => full ?? p))
-   );
+      featuredProductsBasic.map(p => getBusinessProductById(id, p.id).then(full => full ?? p))
+   );   
 
    if (!business) {
       notFound();
@@ -41,9 +42,6 @@ export default async function DashboardBusinessPage({
          {/* Header Info */}
          <div className="bg-card border border-border rounded-xl p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-sm">
             <div className="flex items-start gap-4">
-               <div className="bg-primary/20 p-4 rounded-2xl shrink-0">
-                  <Store className="w-10 h-10 text-primary" />
-               </div>
                <div className="flex flex-col gap-1">
                   <h1 className="text-3xl font-black">{business.name}</h1>
                   <div className="flex items-center gap-3 text-muted-foreground text-sm font-medium">
@@ -111,7 +109,7 @@ export default async function DashboardBusinessPage({
             ) : (
                <div className="flex flex-col gap-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                     {products.slice(0, 5).map((prod) => (
+                     {products.slice(0, 3).map((prod) => (
                         <Link key={prod.id} href={`/dashboard/businesses/${business.id}/products/${prod.id}`}>
                            <div className="border border-border bg-card hover:border-primary/50 p-4 flex gap-4 items-center rounded-xl cursor-pointer transition-colors group shadow-sm">
                               <div className="w-20 h-20 bg-muted rounded-lg shrink-0 flex items-center justify-center overflow-hidden relative border border-border/50">
@@ -136,16 +134,13 @@ export default async function DashboardBusinessPage({
                         </Link>
                      ))}
                   </div>
-
-                  {products.length > 5 && (
-                     <div className="flex justify-center">
-                        <Button variant="ghost" className="rounded-xl font-bold gap-2 text-primary hover:text-primary hover:bg-primary/5" asChild>
-                           <Link href={`/dashboard/businesses/${business.id}/products`}>
-                              Ver Inventario Completo ({products.length} productos) <ChevronRight className="w-4 h-4" />
-                           </Link>
-                        </Button>
-                     </div>
-                  )}
+                  <div className="flex justify-center">
+                     <Button variant="ghost" className="rounded-xl font-bold gap-2 text-primary hover:text-primary hover:bg-primary/5" asChild>
+                        <Link href={`/dashboard/businesses/${business.id}/products`}>
+                           Ver Inventario Completo <ChevronRight className="w-4 h-4" />
+                        </Link>
+                     </Button>
+                  </div>
                </div>
             )}
 

@@ -2,10 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   PackageOpen,
-  Trash2,
-  Tag,
   Plus,
-  ArrowLeft,
   ChevronRight,
   DollarSign
 } from "lucide-react";
@@ -31,12 +28,12 @@ export default async function BusinessProductsPage({
 
   return (
     <div className="flex flex-col gap-8 animate-fade-in max-w-5xl mx-auto pb-12">
-      {/* breadcrumb-ish Header */}S
+      {/* breadcrumb-ish Header */}
       <div className="flex items-center gap-4 border-b border-border/50 pb-6">
         <BackButton businessId={businessId} />
         <div className="flex flex-col">
           <h1 className="text-3xl font-black tracking-tight text-foreground flex items-center gap-2">
-            <PackageOpen className="w-8 h-8 text-primary" /> Inventario Completo
+            Inventario Completo
           </h1>
           <p className="text-muted-foreground font-medium">Gestiona todos los productos de <span className="text-foreground">{business.name}</span></p>
         </div>
@@ -87,7 +84,7 @@ export default async function BusinessProductsPage({
                     <div className="flex items-center gap-2">
                       <h3 className="text-xl font-black truncate">{prod.name}</h3>
                       {prod.is_available ? (
-                        <Badge variant="outline" className="text-green-600 border-green-200 bg-green-50/50 text-[10px]">Disponible</Badge>
+                        <Badge variant="outline" className="text-green-600 border-green-200 bg-green text-[10px]">Disponible</Badge>
                       ) : null}
                     </div>
                     <p className="text-sm text-muted-foreground line-clamp-1 max-w-md">{prod.description || "Sin descripción."}</p>

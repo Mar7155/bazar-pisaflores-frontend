@@ -50,7 +50,6 @@ export function Navbar() {
 
         {/* Logo */}
         <Link href="/" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-2 text-primary font-bold text-xl drop-shadow-sm transition-transform hover:scale-105 z-50">
-          <Store className="w-6 h-6 text-accent" />
           <span>Bazar<span className="text-foreground">Pisaflores</span></span>
         </Link>
 
