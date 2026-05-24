@@ -31,15 +31,34 @@ export const ProductRegistrationSchema = z.object({
 
 export const FlashOfferRegistrationSchema = z.object({
   title: z.string().min(5, { message: "El título debe tener al menos 5 caracteres." }).max(255),
-  description: z.string().optional(),
-  discount_pct: z.string().min(1, "El descuento es requerido.")
-    .refine(val => !isNaN(Number(val)) && Number(val) >= 1 && Number(val) <= 100, { message: "Debe ser entre 1 y 100" }),
-  starts_at: z.string().min(1, "Define la fecha de inicio"),
-  expires_at: z.string().min(1, "Define la fecha de término")
+  description: z.string().min(5, { message: "La descripcion debe tener almenos 5 caracteres."}).max(255),
+  discount_pct: z.string().optional()
+    .refine(
+      (val) => {
+        if (!val || val.trim() === "") return true;
+        const num = Number(val);
+        return !isNaN(num) && num >= 1 && num <= 100;
+      }, 
+      { message: "El descuento debe ser un número entero entre 1 y 100" }
+    ),
+  starts_at: z.date({ error: "Define la fecha de inicio." }),
+  expires_at: z.date({ error: "Define la fecha de término." }),
 }).refine(data => {
+  if (!data.starts_at) return true;
+  const maxStart = new Date();
+  maxStart.setMonth(maxStart.getMonth() + 1);
+  return data.starts_at <= maxStart;
+}, { message: "La fecha de inicio no puede ser más de un mes desde hoy.", path: ["starts_at"] })
+.refine(data => {
   if (!data.starts_at || !data.expires_at) return true;
-  return new Date(data.expires_at) > new Date(data.starts_at);
-}, { message: "La fecha de fin debe ser posterior a la de inicio.", path: ["expires_at"]});
+  return data.expires_at > data.starts_at;
+}, { message: "La fecha de fin debe ser posterior a la de inicio.", path: ["expires_at"] })
+.refine(data => {
+  if (!data.starts_at || !data.expires_at) return true;
+  const maxExpiry = new Date(data.starts_at);
+  maxExpiry.setMonth(maxExpiry.getMonth() + 1);
+  return data.expires_at <= maxExpiry;
+}, { message: "La fecha de fin no puede ser más de un mes después del inicio.", path: ["expires_at"] });
 
 export const ForgotPasswordSchema = z.object({
   email: z.string().email({ message: "El correo electrónico debe ser válido." }),

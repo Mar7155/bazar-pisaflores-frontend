@@ -689,8 +689,12 @@ export async function createFlashOffer(businessId: string, data: FlashOfferRegis
         title: data.title,
         description: data.description || undefined,
         discountPct: data.discount_pct ? Number(data.discount_pct) : undefined,
-        startsAt: data.starts_at ? new Date(data.starts_at).toISOString() : undefined,
-        expiresAt: new Date(data.expires_at).toISOString(),
+        startsAt: data.starts_at instanceof Date
+          ? data.starts_at.toISOString()
+          : data.starts_at ? new Date(data.starts_at as string).toISOString() : undefined,
+        expiresAt: data.expires_at instanceof Date
+          ? data.expires_at.toISOString()
+          : new Date(data.expires_at as string).toISOString(),
       }),
     });
     return normalizeFlashOffer(raw);
@@ -700,8 +704,12 @@ export async function createFlashOffer(businessId: string, data: FlashOfferRegis
     id: crypto.randomUUID(), business_id: businessId,
     title: data.title, description: data.description || "",
     discount_pct: Number(data.discount_pct),
-    starts_at: data.starts_at || new Date().toISOString(),
-    expires_at: data.expires_at,
+    starts_at: data.starts_at instanceof Date
+      ? data.starts_at.toISOString()
+      : data.starts_at || new Date().toISOString(),
+    expires_at: data.expires_at instanceof Date
+      ? data.expires_at.toISOString()
+      : (data.expires_at as string),
     is_active: true, created_at: new Date().toISOString(),
     business: businessesMock.find(b => b.id === businessId),
   };

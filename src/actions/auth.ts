@@ -178,10 +178,11 @@ export async function forgotPasswordAction(email: string): Promise<AuthActionRes
 export async function resetPasswordAction(email: string, code: string, newPassword: string): Promise<AuthActionResult> {
   if (USE_MOCK) return {};
   try {
+    const password = newPassword;
     const res = await fetch(`${API_URL}/auth/reset-password`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, code, newPassword }),
+      body: JSON.stringify({ email, code, password }),
     });
     const body = await res.json().catch(() => ({}));
     if (!res.ok) return { error: body.error ?? "Error al restablecer la contraseña." };

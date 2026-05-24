@@ -155,7 +155,6 @@ export default function ForgotPasswordPage() {
 
                 <div className="space-y-2">
                   <Label htmlFor="newPassword">Nueva Contraseña</Label>
-                  <Label htmlFor="newPassword" className="text-sm text-muted-foreground">Mínimo 8 caracteres, una mayúscula, un número y un caracter especial</Label>
                   <Input
                     id="newPassword"
                     type="password"
@@ -164,13 +163,14 @@ export default function ForgotPasswordPage() {
                     className={resetForm.formState.errors.newPassword ? "border-red-500 focus-visible:ring-red-500" : ""}
                   />
                   {resetForm.formState.errors.newPassword && <p className="text-sm text-red-500 font-medium">{resetForm.formState.errors.newPassword.message}</p>}
+                  <Label htmlFor="newPassword" className="text-sm text-muted-foreground">Mínimo 8 caracteres, una mayúscula, un número y un caracter especial</Label>
                 </div>
 
                 <Button type="submit" className="w-full shadow-md" disabled={isSubmitting} size="lg">
                   {isSubmitting ? (
                     <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Guardando...</>
                   ) : (
-                    "Guardar y Entrar"
+                    "Guardar"
                   )}
                 </Button>
               </form>
