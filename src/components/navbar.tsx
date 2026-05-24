@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { useTheme } from "next-themes";
-import { Store, Moon, Sun, Search, Menu, X, LogOut, User, LayoutDashboard } from "lucide-react";
+import { Moon, Sun, Menu, X, LogOut, User, LayoutDashboard } from "lucide-react";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { logoutAction } from "@/actions/auth";
 import { appToast } from "@/lib/toast";
+import { NavSearchInput } from "@/components/nav-search-input";
 
 function getCookieValue(name: string): string | null {
   if (typeof document === "undefined") return null;
@@ -55,15 +56,10 @@ export function Navbar() {
 
         {/* Desktop Links & Actions */}
         <div className="hidden md:flex items-center gap-6">
-          <form action="/search" className="relative group">
-            <input
-              type="text"
-              name="q"
-              placeholder="Buscar..."
-              className="pl-10 pr-4 py-2 w-64 rounded-full bg-muted/50 border border-transparent focus:border-primary focus:bg-background outline-none transition-all text-sm"
-            />
-            <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
-          </form>
+          <NavSearchInput
+            size="sm"
+            placeholder="Buscar negocios..."
+          />
 
           <Link href="/businesses" className="text-sm font-medium hover:text-primary transition-colors">
             Negocios
@@ -137,15 +133,11 @@ export function Navbar() {
       {/* Mobile Dropdown Overlay */}
       {isMenuOpen && (
         <div className="md:hidden absolute top-16 left-0 w-full bg-background border-b border-border shadow-lg animate-in slide-in-from-top-2 p-4 flex flex-col gap-4 animate-slide-up">
-          <form action="/search" className="relative w-full" onSubmit={() => setIsMenuOpen(false)}>
-            <input
-              type="text"
-              name="q"
-              placeholder="Buscar comercios..."
-              className="pl-10 pr-4 py-3 w-full rounded-full bg-muted/50 border border-border focus:border-primary outline-none transition-all text-base"
-            />
-            <Search className="w-5 h-5 text-muted-foreground absolute left-4 top-1/2 -translate-y-1/2" />
-          </form>
+          <NavSearchInput
+            size="md"
+            placeholder="Buscar comercios..."
+            onSubmit={() => setIsMenuOpen(false)}
+          />
           <div className="flex flex-col gap-2">
             <Link href="/" onClick={() => setIsMenuOpen(false)} className="px-4 py-3 rounded-xl hover:bg-muted font-semibold text-lg">
               Inicio
