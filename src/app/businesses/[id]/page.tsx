@@ -1,10 +1,9 @@
-import { Clock, MapPin, Search, MessageCircle, Star, ShoppingBag, Store, Flame, ImageIcon } from "lucide-react";
+import { Clock, MapPin, Search, MessageCircle, ShoppingBag, Store, Flame, ImageIcon } from "lucide-react";
 import Link from "next/link";
 import { getBusinessById, getProductsByBusinessId, getBusinessProductById } from "@/lib/api";
 import { getImageUrl } from "@/lib/utils";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { notFound } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import Image from "next/image";
 import { FlashOfferCard } from "@/components/dashboard/flash-offer-card";
@@ -80,8 +79,8 @@ export default async function BusinessProfile({
 
       <div className="container mx-auto px-4 py-8 max-w-5xl grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-        {/* Left Column: Info & Schedules */}
-        <div className="lg:col-span-1 flex flex-col gap-6">
+        {/* Left Column: Info & Schedules — order-2 en mobile para que el catálogo aparezca primero */}
+        <div className="lg:col-span-1 flex flex-col gap-6 order-2 lg:order-1">
           {/* Info Card */}
           <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
             <h3 className="font-bold text-lg mb-4 text-foreground flex items-center gap-2">
@@ -174,8 +173,8 @@ export default async function BusinessProfile({
           */}
         </div>
 
-        {/* Right Column: Catalog */}
-        <div className="lg:col-span-2">
+        {/* Right Column: Catalog — order-1 en mobile para que aparezca primero */}
+        <div className="lg:col-span-2 order-1 lg:order-2">
 
           {(() => {
             const activeOffers = (business.flash_offers || []).filter(o => o.is_active && new Date(o.expires_at) > new Date());
@@ -195,15 +194,15 @@ export default async function BusinessProfile({
             );
           })()}
 
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
             <h2 className="text-2xl font-bold flex items-center gap-2">
               <ShoppingBag className="w-6 h-6 text-primary" /> Catálogo
             </h2>
-            <div className="relative">
+            <div className="relative w-full sm:w-64">
               <input
                 type="text"
                 placeholder="Buscar en el menú..."
-                className="pl-9 pr-4 py-2 rounded-full bg-card border border-border focus:border-primary outline-none transition-all text-sm w-full md:w-64"
+                className="pl-9 pr-4 py-2 rounded-full bg-card border border-border focus:border-primary outline-none transition-all text-sm w-full"
               />
               <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
             </div>
