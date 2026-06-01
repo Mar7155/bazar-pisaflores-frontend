@@ -49,8 +49,5 @@
     "msw": true,
     "sharp": true,
     "unrs-resolver": true
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": ["msw", "sharp", "unrs-resolver"]
   }
 }
