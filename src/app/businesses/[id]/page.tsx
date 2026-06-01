@@ -52,9 +52,9 @@ export default async function BusinessProfile({
         <div className="relative z-20 w-full px-4 pb-8 md:pb-12 pt-24">
           <div className="container mx-auto max-w-5xl flex flex-col md:flex-row md:items-end gap-6 justify-between">
             <div className="flex flex-col gap-2">
-              <div className="flex items-center gap-2 mb-1 text-sm font-semibold text-primary">
+              <div className="flex items-center gap-2 mb-1 text-sm font-semibold text-foreground">
                 {business.category && (
-                  <span className="bg-primary/10 px-3 py-1 rounded-full">{business.category.name}</span>
+                  <span className="bg-primary/80 px-3 py-1 rounded-full">{business.category.name}</span>
                 )}
               </div>
               <h1 className="text-4xl md:text-5xl font-black text-foreground drop-shadow-md leading-tight">
