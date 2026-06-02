@@ -79,8 +79,8 @@ export default async function BusinessProfile({
 
       <div className="container mx-auto px-4 py-8 max-w-5xl grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-        {/* Left Column: Info & Schedules — order-2 en mobile para que el catálogo aparezca primero */}
-        <div className="lg:col-span-1 flex flex-col gap-6 order-2 lg:order-1">
+        {/* Left Column: Info & Schedules*/}
+        <div className="lg:col-span-1 flex flex-col gap-6 lg:order-1">
           {/* Info Card */}
           <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
             <h3 className="font-bold text-lg mb-4 text-foreground flex items-center gap-2">
