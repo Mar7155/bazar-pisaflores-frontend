@@ -67,15 +67,16 @@ Este documento establece la planeación, clasificación y diseño técnico de la
 
 ---
 
-### 2.2 Buscador Interno de Productos dentro del Perfil de un Negocio
+### ~~2.2 Buscador Interno de Productos dentro del Perfil de un Negocio~~ ✅ Implementado
 
-**Descripción:** Añadir una barra de búsqueda específica dentro de la vista pública del negocio (`/businesses/:id`) para filtrar únicamente su catálogo local sin recargar la página.
+**Descripción:** Barra de búsqueda dentro de la vista pública del negocio (`/businesses/:id`) que filtra el catálogo local en tiempo real sin recargar la página.
 
-**Especificación técnica:**
+**Implementación:**
 
-- El backend ya soporta el query param `q` en `GET /businesses/:id/products`.
-- Implementar estado de React en el componente del perfil para disparar el re-fetch de TanStack Query de forma reactiva al escribir.
-- Aplicar un **debounce de 300ms** para evitar llamadas excesivas a la API.
+- Extraído a `components/business/product-catalog.tsx` como Client Component (`"use client"`) para resolver el error de hidratación SSR causado por los IDs dinámicos de Radix UI (`Dialog`, `Carousel`).
+- Filtrado client-side con `useState` sobre el array de productos ya cargado — sin llamadas adicionales a la API.
+- Muestra estado vacío diferenciado: `"Sin resultados para '...'"` vs `"Aún no hay productos disponibles."`
+- El mensaje de WhatsApp del modal ahora incluye nombre y precio del producto.
 
 ---
 
