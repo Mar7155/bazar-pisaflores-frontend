@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo, Suspense } from "react";
+import { useState, useEffect, useCallback, Suspense, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
@@ -93,12 +93,15 @@ function ProductsPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  // Leer estado inicial desde la URL
   const pageFromUrl     = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10));
   const searchFromUrl   = searchParams.get("q") ?? "";
   const categoryFromUrl = searchParams.get("category") ?? "all";
-  // La seed viene de la URL para que la paginación sea consistente en la misma sesión
-  const seedFromUrl     = searchParams.get("seed") ?? newSeed();
+
+  // La seed se genera una sola vez por montaje del componente y se persiste en
+  // la URL. Si ya está en la URL (paginación, filtros) se reutiliza.
+  // Usar useRef para que newSeed() no se recalcule en cada render.
+  const fallbackSeed = useRef(newSeed());
+  const seedFromUrl  = searchParams.get("seed") ?? fallbackSeed.current;
 
   const [inputValue, setInputValue] = useState(searchFromUrl);
   const [categories, setCategories] = useState<Awaited<ReturnType<typeof getCategories>>>([]);
