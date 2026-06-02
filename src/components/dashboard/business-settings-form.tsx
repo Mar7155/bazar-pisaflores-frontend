@@ -194,8 +194,13 @@ export function BusinessSettingsForm({ business, categories, id }: BusinessSetti
                               id="phone"
                               {...infoForm.register("phone")}
                               className="bg-background/50 border-border/80"
-                              placeholder="10 dígitos"
+                              placeholder="52 123 456 7890"
                            />
+                           { infoForm.formState.errors.phone ? (
+                              <p className="text-red-500">{infoForm.formState.errors.phone.message}</p>
+                           ) : (
+                              <p className="text-muted-foreground">Ingresa tu numero con el codigo de país (ej. 1 o 52 sin "+")</p>
+                           )}
                         </div>
 
                         <div className="space-y-2">

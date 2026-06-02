@@ -102,11 +102,15 @@ export function NewBusinessForm({ categories }: NewBusinessFormProps) {
             <Input
               id="phone"
               type="tel"
-              placeholder="10 dígitos"
+              placeholder="52 123 456 7890"
               {...register("phone")}
               className={errors.phone ? "border-red-500" : ""}
             />
-            {errors.phone && <p className="text-sm text-red-500">{errors.phone.message}</p>}
+            { errors.phone ? (
+              <p className="text-red-500">{errors.phone.message}</p>
+            ) : (
+              <p className="text-muted-foreground">Ingresa tu numero con el codigo de país (ej. 1 o 52 sin "+")</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -122,7 +126,7 @@ export function NewBusinessForm({ categories }: NewBusinessFormProps) {
             </div>
             <div className="flex justify-between items-center text-xs">
               {errors.address ? (
-                <p className="text-red-500 font-medium">{errors.address.message}</p>
+                <p className="text-red-500">{errors.address.message}</p>
               ) : (
                 <p className="text-muted-foreground">Máximo 100 caracteres.</p>
               )}
