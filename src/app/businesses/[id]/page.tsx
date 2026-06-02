@@ -1,4 +1,4 @@
-import { Clock, MapPin, MessageCircle, Store, Flame, ImageIcon } from "lucide-react";
+import { Clock, MapPin, MessageCircle, Store, Flame, ImageIcon, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { getBusinessById, getProductsByBusinessId, getBusinessProductById } from "@/lib/api";
 import { getImageUrl, getWhatsAppLink } from "@/lib/utils";
@@ -7,6 +7,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import Image from "next/image";
 import { FlashOfferCard } from "@/components/dashboard/flash-offer-card";
 import { ProductCatalog } from "@/components/business/product-catalog";
+import { Button } from "@/components/ui/button";
 
 export default async function BusinessProfile({
   params,
@@ -51,6 +52,13 @@ export default async function BusinessProfile({
         {/* Header Content Wrapper */}
         <div className="relative z-20 w-full px-4 pb-8 md:pb-12 pt-24">
           <div className="container mx-auto max-w-5xl flex flex-col md:flex-row md:items-end gap-6 justify-between">
+            <div className="flex items-center gap-4">
+              <Button variant="default" size="icon" asChild className="rounded-full border-primary border-1">
+                <Link href="/businesses">
+                    <ArrowLeft className="w-5 h-5 text-foreground" />
+                </Link>
+              </Button>
+            </div>
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2 mb-1 text-sm font-semibold text-foreground">
                 {business.category && (
