@@ -20,6 +20,13 @@ export interface PaginatedResponse<T> {
   limit: number;
   offset: number;
 }
+
+// Tipo extendido que devuelve GET /products/all (incluye contexto del negocio)
+export interface GlobalProduct extends Product {
+  business_id: string;
+  business_name: string;
+  cover_image: string | null;
+}
 import {
   ProductRegistrationFormValues,
   BusinessRegistrationFormValues,
@@ -434,6 +441,59 @@ export async function getProducts(query: string): Promise<Product[]> {
   if (!query) return [];
   const q = query.toLowerCase();
   return productsMock.filter(p => p.name.toLowerCase().includes(q) || p.description?.toLowerCase().includes(q));
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function normalizeGlobalProduct(raw: any): GlobalProduct {
+  return {
+    ...normalizeProduct(raw),
+    business_id:   raw.businessId  ?? raw.business_id,
+    business_name: raw.businessName ?? raw.business_name ?? "",
+    cover_image:   raw.coverImage   ?? raw.cover_image   ?? null,
+  };
+}
+
+export async function getGlobalProducts(opts?: {
+  q?:          string;
+  categoryId?: string;
+  seed?:       string;
+  limit?:      number;
+  offset?:     number;
+}): Promise<PaginatedResponse<GlobalProduct>> {
+  const limit  = opts?.limit  ?? 20;
+  const offset = opts?.offset ?? 0;
+
+  if (!USE_MOCK) {
+    try {
+      const params = new URLSearchParams();
+      if (opts?.q)          params.append("q",          opts.q);
+      if (opts?.categoryId && opts.categoryId !== "all")
+                            params.append("categoryId", opts.categoryId);
+      if (opts?.seed)       params.append("seed",       opts.seed);
+      params.append("limit",  String(limit));
+      params.append("offset", String(offset));
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const raw = await apiFetch<any>(`/products/all?${params.toString()}`);
+      const data  = extractArray<unknown>(raw).map(normalizeGlobalProduct);
+      const total = typeof raw?.total === "number" ? raw.total : data.length;
+      return { data, total, limit, offset };
+    } catch { return { data: [], total: 0, limit, offset }; }
+  }
+
+  // Mock: enriquecer productsMock con businessName
+  await sleep(100);
+  let res = productsMock.map(p => ({
+    ...p,
+    business_id:   p.business_id,
+    business_name: businessesMock.find(b => b.id === p.business_id)?.name ?? "Negocio",
+    cover_image:   null,
+  })) as GlobalProduct[];
+  if (opts?.q) {
+    const q = opts.q.toLowerCase();
+    res = res.filter(p => p.name.toLowerCase().includes(q) || p.description?.toLowerCase().includes(q));
+  }
+  const total = res.length;
+  return { data: res.slice(offset, offset + limit), total, limit, offset };
 }
 
 export async function uploadImage(
