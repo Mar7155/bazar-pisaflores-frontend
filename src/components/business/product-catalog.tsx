@@ -11,15 +11,16 @@ import {
   Carousel, CarouselContent, CarouselItem,
   CarouselNext, CarouselPrevious,
 } from "@/components/ui/carousel";
-import { getImageUrl } from "@/lib/utils";
+import { getImageUrl, getWhatsAppLink } from "@/lib/utils";
 import type { Product } from "@/types";
 
 interface ProductCatalogProps {
   products: Product[];
   businessPhone: string | null | undefined;
+  businessName: string;
 }
 
-export function ProductCatalog({ products, businessPhone }: ProductCatalogProps) {
+export function ProductCatalog({ products, businessPhone, businessName }: ProductCatalogProps) {
   const [query, setQuery] = useState("");
 
   const filtered = query.trim()
@@ -146,14 +147,16 @@ export function ProductCatalog({ products, businessPhone }: ProductCatalogProps)
                   </div>
                 </div>
 
-                <a
-                  href={`https://wa.me/52${businessPhone}?text=${encodeURIComponent(`Hola, vi el producto "${prod.name}" en Bazar Pisaflores con precio de $${prod.price}. ¿Tiene disponibilidad?`)}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="w-full mt-6 bg-[#25D366] text-white hover:bg-[#1ebe5d] p-3 rounded-md font-bold text-center flex items-center justify-center gap-2 transition-colors"
-                >
-                  <MessageCircle className="w-5 h-5" /> Pedir por WhatsApp
-                </a>
+                {getWhatsAppLink(businessPhone, businessName, prod.name, prod.price) && (
+                  <a
+                    href={getWhatsAppLink(businessPhone, businessName, prod.name, prod.price)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="w-full mt-6 bg-[#25D366] text-white hover:bg-[#1ebe5d] p-3 rounded-md font-bold text-center flex items-center justify-center gap-2 transition-colors"
+                  >
+                    <MessageCircle className="w-5 h-5" /> Pedir por WhatsApp
+                  </a>
+                )}
               </DialogContent>
             </Dialog>
           ))}

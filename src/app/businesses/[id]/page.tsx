@@ -1,7 +1,7 @@
-import { Clock, MapPin, MessageCircle, ShoppingBag, Store, Flame, ImageIcon } from "lucide-react";
+import { Clock, MapPin, MessageCircle, Store, Flame, ImageIcon } from "lucide-react";
 import Link from "next/link";
 import { getBusinessById, getProductsByBusinessId, getBusinessProductById } from "@/lib/api";
-import { getImageUrl } from "@/lib/utils";
+import { getImageUrl, getWhatsAppLink } from "@/lib/utils";
 import { notFound } from "next/navigation";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import Image from "next/image";
@@ -65,14 +65,16 @@ export default async function BusinessProfile({
               </p>
             </div>
 
-            <Link
-              href={`https://wa.me/52${business.phone}?text=Buenos%20dias,%20me%20interesa%20su%20negocio`}
-              target="_blank"
-              rel="noreferrer"
-              className="w-full md:w-auto min-w-[200px] bg-[#25D366] text-white hover:bg-[#1ebe5d] p-4 rounded-xl font-bold text-center flex items-center justify-center gap-2 transition-all shadow-lg hover:shadow-xl hover:-translate-y-1"
-            >
-              <MessageCircle className="w-5 h-5" /> Mandar mensaje
-            </Link>
+            {business.phone ? (
+              <Link
+                href={getWhatsAppLink(business.phone, business.name)}
+                target="_blank"
+                rel="noreferrer"
+                className="w-full md:w-auto min-w-[200px] bg-[#25D366] text-white hover:bg-[#1ebe5d] p-4 rounded-xl font-bold text-center flex items-center justify-center gap-2 transition-all shadow-lg hover:shadow-xl hover:-translate-y-1"
+              >
+                <MessageCircle className="w-5 h-5" /> Mandar mensaje
+              </Link>
+            ) : null}
           </div>
         </div>
       </div>
@@ -194,7 +196,7 @@ export default async function BusinessProfile({
             );
           })()}
 
-          <ProductCatalog products={products} businessPhone={business.phone} />
+          <ProductCatalog products={products} businessPhone={business.phone} businessName={business.name} />
         </div>
       </div>
     </section>
