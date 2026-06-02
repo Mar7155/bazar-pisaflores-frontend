@@ -57,12 +57,16 @@ export default async function BusinessProfile({
                   <span className="bg-primary/80 px-3 py-1 rounded-full">{business.category.name}</span>
                 )}
               </div>
-              <h1 className="text-4xl md:text-5xl font-black text-foreground drop-shadow-md leading-tight">
-                {business.name}
-              </h1>
-              <p className="text-lg text-muted-foreground font-medium max-w-xl">
-                {business.description || "Sin descripción disponible."}
-              </p>
+              <div className="flex items-center gap-2 mb-1 text-sm font-semibold text-foreground bg-muted/60 px-1 py-1 rounded-sm">
+                <h1 className="text-4xl md:text-5xl font-black text-foreground drop-shadow-md leading-tight">
+                  {business.name}
+                </h1>
+              </div>
+              <div className="flex items-center gap-2 mb-1 text-sm font-semibold text-foreground bg-muted/60 px-1 py-1 rounded-sm">
+                <p className="text-lg text-foreground font-medium max-w-xl">
+                  {business.description || "Sin descripción disponible."}
+                </p>
+              </div>
             </div>
 
             {business.phone ? (
