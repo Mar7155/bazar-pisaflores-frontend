@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Shuffle, ShoppingBag, Store } from "lucide-react";
 
 import { getGlobalProducts, getCategories, type GlobalProduct } from "@/lib/api";
@@ -11,7 +12,6 @@ import { getImageUrl } from "@/lib/utils";
 import { appToast } from "@/lib/toast";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CategoryFilter, SearchBar } from "@/components/search-filters";
 import { PaginationBar } from "@/components/pagination-bar";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -19,7 +19,6 @@ import { PaginationBar } from "@/components/pagination-bar";
 // ─────────────────────────────────────────────────────────────────────────────
 const LIMIT = 20;
 
-/** Short random string that identifies the current shuffle session */
 function newSeed(): string {
   return Math.random().toString(36).substring(2, 9);
 }
@@ -54,7 +53,6 @@ function GlobalProductCard({ product }: { product: GlobalProduct }) {
       href={`/businesses/${product.business_id}`}
       className="group flex flex-col rounded-xl border border-border bg-card overflow-hidden hover:border-primary/50 hover:shadow-md transition-all duration-200"
     >
-      {/* Imagen cuadrada */}
       <div className="relative w-full aspect-square bg-muted overflow-hidden">
         <Image
           src={imgSrc}
@@ -72,17 +70,13 @@ function GlobalProductCard({ product }: { product: GlobalProduct }) {
         )}
       </div>
 
-      {/* Info */}
       <div className="p-2.5 flex flex-col gap-0.5">
-        {/* Precio */}
         <span className="text-base font-black text-foreground leading-tight">
           ${product.price}
         </span>
-        {/* Nombre */}
         <p className="text-sm font-semibold text-foreground line-clamp-2 leading-snug">
           {product.name}
         </p>
-        {/* Negocio */}
         <span className="text-xs text-muted-foreground truncate flex items-center gap-1 mt-0.5">
           <Store className="w-3 h-3 shrink-0" />
           {product.business_name}
@@ -93,54 +87,87 @@ function GlobalProductCard({ product }: { product: GlobalProduct }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PAGE
+// INNER PAGE — usa useSearchParams, envuelto en Suspense
 // ─────────────────────────────────────────────────────────────────────────────
-export default function ProductsMarketplacePage() {
-  // ── State ────────────────────────────────────────────────────────────────
-  const [inputValue,       setInputValue]       = useState("");
-  const [search,           setSearch]           = useState("");      // debounced
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [currentPage,      setCurrentPage]      = useState(1);
-  const [catalogSeed,      setCatalogSeed]      = useState<string>(() => newSeed());
+function ProductsPageContent() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
-  // Debounce: actualiza `search` 300ms después de que el usuario deja de escribir
+  // Leer estado inicial desde la URL
+  const pageFromUrl     = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10));
+  const searchFromUrl   = searchParams.get("q") ?? "";
+  const categoryFromUrl = searchParams.get("category") ?? "all";
+  // La seed viene de la URL para que la paginación sea consistente en la misma sesión
+  const seedFromUrl     = searchParams.get("seed") ?? newSeed();
+
+  const [inputValue, setInputValue] = useState(searchFromUrl);
+  const [categories, setCategories] = useState<Awaited<ReturnType<typeof getCategories>>>([]);
+
+  // Cargar categorías una vez
+  useEffect(() => {
+    getCategories().then(setCategories);
+  }, []);
+
+  // Debounce del buscador — navega a ?q=... reseteando a page=1
   useEffect(() => {
     const timer = setTimeout(() => {
-      setSearch(inputValue);
-      setCurrentPage(1); // reset al buscar
+      if (inputValue === searchFromUrl) return; // sin cambio
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("q", inputValue);
+      params.delete("page"); // reset página
+      if (!inputValue) params.delete("q");
+      router.push(`/products?${params.toString()}`);
     }, 300);
     return () => clearTimeout(timer);
-  }, [inputValue]);
+  }, [inputValue]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Categorías ────────────────────────────────────────────────────────────
-  const { data: categories = [] } = useQuery({
-    queryKey: ["categories"],
-    queryFn:  getCategories,
-    staleTime: Infinity,
-  });
+  // ── buildUrl para PaginationBar — cambia solo el page, preserva todo lo demás
+  const buildUrl = useCallback(
+    (page: number) => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (page > 1) params.set("page", String(page));
+      else          params.delete("page");
+      return `/products?${params.toString()}`;
+    },
+    [searchParams]
+  );
 
-  // ── Productos globales ────────────────────────────────────────────────────
-  const offset = (currentPage - 1) * LIMIT;
+  // ── Cambiar categoría — navega reseteando página
+  const handleCategoryChange = useCallback(
+    (catId: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (catId !== "all") params.set("category", catId);
+      else                 params.delete("category");
+      params.delete("page");
+      router.push(`/products?${params.toString()}`);
+    },
+    [searchParams, router]
+  );
 
-  const {
-    data,
-    isLoading,
-    isError,
-    error,
-  } = useQuery({
-    queryKey: ["products-global", search, selectedCategory, currentPage, catalogSeed],
-    queryFn:  () => getGlobalProducts({
-      q:          search     || undefined,
-      categoryId: selectedCategory !== "all" ? selectedCategory : undefined,
-      seed:       catalogSeed,
+  // ── Mezclar — nueva seed, reset página
+  const handleShuffle = useCallback(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("seed", newSeed());
+    params.delete("page");
+    router.push(`/products?${params.toString()}`);
+  }, [searchParams, router]);
+
+  // ── Fetch
+  const offset = (pageFromUrl - 1) * LIMIT;
+
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ["products-global", searchFromUrl, categoryFromUrl, pageFromUrl, seedFromUrl],
+    queryFn: () => getGlobalProducts({
+      q:          searchFromUrl  || undefined,
+      categoryId: categoryFromUrl !== "all" ? categoryFromUrl : undefined,
+      seed:       seedFromUrl,
       limit:      LIMIT,
       offset,
     }),
-    staleTime: 2 * 60 * 1000,   // 2 min — los datos no cambian tan seguido
-    placeholderData: (prev) => prev, // mantiene datos anteriores mientras carga la nueva página
+    staleTime: 2 * 60 * 1000,
+    placeholderData: (prev) => prev,
   });
 
-  // Notificar errores sin lanzar excepciones al render
   useEffect(() => {
     if (isError) {
       appToast.error("No se pudo cargar el catálogo.", {
@@ -149,43 +176,14 @@ export default function ProductsMarketplacePage() {
     }
   }, [isError, error]);
 
-  const products    = data?.data    ?? [];
-  const total       = data?.total   ?? 0;
-  const totalPages  = Math.max(1, Math.ceil(total / LIMIT));
+  const products   = data?.data   ?? [];
+  const total      = data?.total  ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / LIMIT));
 
-  // ── Acciones ──────────────────────────────────────────────────────────────
-  const handleShuffle = useCallback(() => {
-    setCatalogSeed(newSeed());
-    setCurrentPage(1);
-  }, []);
-
-  const handleCategoryChange = useCallback((catId: string) => {
-    setSelectedCategory(catId);
-    setCurrentPage(1);
-  }, []);
-
-  // buildUrl para PaginationBar — mantiene todos los estados actuales
-  const buildUrl = useCallback(
-    (page: number) => {
-      const params = new URLSearchParams();
-      if (search)                  params.set("q",        search);
-      if (selectedCategory !== "all") params.set("category", selectedCategory);
-      if (page > 1)                params.set("page",     String(page));
-      params.set("seed", catalogSeed);
-      const qs = params.toString();
-      return `/products${qs ? `?${qs}` : ""}`;
-    },
-    [search, selectedCategory, catalogSeed]
-  );
-
-  // Categorías con formato que espera CategoryFilter (id + nombre)
-  const categoryItems = useMemo(() => categories, [categories]);
-
-  // ── Render ────────────────────────────────────────────────────────────────
+  // ── Render
   return (
     <div className="container mx-auto px-4 py-6 max-w-6xl flex flex-col gap-5 animate-fade-in">
 
-      {/* ── Encabezado ────────────────────────────────────────────────────── */}
       <div className="flex flex-col gap-1">
         <h1 className="text-2xl md:text-3xl font-black flex items-center gap-2">
           <ShoppingBag className="w-7 h-7 text-primary" />
@@ -196,9 +194,8 @@ export default function ProductsMarketplacePage() {
         </p>
       </div>
 
-      {/* ── Barra de búsqueda + botón mezclar ─────────────────────────────── */}
+      {/* Buscador + mezclar */}
       <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
-        {/* SearchBar controlado (no usa form GET, sino estado React) */}
         <div className="relative flex-1">
           <input
             type="text"
@@ -209,8 +206,7 @@ export default function ProductsMarketplacePage() {
           />
           <svg
             className="w-4 h-4 text-muted-foreground absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
-            fill="none" stroke="currentColor" strokeWidth={2}
-            viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"
           >
             <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
           </svg>
@@ -226,26 +222,24 @@ export default function ProductsMarketplacePage() {
         </Button>
       </div>
 
-      {/* ── Filtro de categorías ──────────────────────────────────────────── */}
-      {/* CategoryFilter usa <Link> — interceptamos el click para actualizar estado en lugar de navegar */}
+      {/* Filtro categorías */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
-        {/* Pill "Todos" */}
         <button
           onClick={() => handleCategoryChange("all")}
           className={`shrink-0 px-4 py-1.5 rounded-full text-sm font-semibold transition-colors ${
-            selectedCategory === "all"
+            categoryFromUrl === "all"
               ? "bg-primary text-primary-foreground"
               : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
           }`}
         >
           Todos
         </button>
-        {categoryItems.map(cat => (
+        {categories.map(cat => (
           <button
             key={cat.id}
             onClick={() => handleCategoryChange(cat.id)}
             className={`shrink-0 px-4 py-1.5 rounded-full text-sm font-semibold transition-colors ${
-              selectedCategory === cat.id
+              categoryFromUrl === cat.id
                 ? "bg-primary text-primary-foreground"
                 : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
             }`}
@@ -255,7 +249,7 @@ export default function ProductsMarketplacePage() {
         ))}
       </div>
 
-      {/* ── Contador de resultados ────────────────────────────────────────── */}
+      {/* Contador */}
       {!isLoading && (
         <p className="text-sm text-muted-foreground -mt-1">
           {total > 0
@@ -264,7 +258,7 @@ export default function ProductsMarketplacePage() {
         </p>
       )}
 
-      {/* ── Grilla ───────────────────────────────────────────────────────── */}
+      {/* Grilla */}
       {isLoading ? (
         <ProductSkeletonGrid />
       ) : products.length === 0 ? (
@@ -273,16 +267,16 @@ export default function ProductsMarketplacePage() {
           <div>
             <p className="font-bold text-lg">Sin productos</p>
             <p className="text-muted-foreground text-sm">
-              {search
-                ? `No encontramos resultados para "${search}"`
+              {searchFromUrl
+                ? `No encontramos resultados para "${searchFromUrl}"`
                 : "No hay productos disponibles en esta categoría."}
             </p>
           </div>
-          {(search || selectedCategory !== "all") && (
+          {(searchFromUrl || categoryFromUrl !== "all") && (
             <Button
               variant="outline"
               size="sm"
-              onClick={() => { setInputValue(""); setSelectedCategory("all"); setCurrentPage(1); }}
+              onClick={() => router.push("/products")}
             >
               Limpiar filtros
             </Button>
@@ -296,14 +290,25 @@ export default function ProductsMarketplacePage() {
         </div>
       )}
 
-      {/* ── Paginación ────────────────────────────────────────────────────── */}
+      {/* Paginación */}
       {totalPages > 1 && (
         <PaginationBar
-          currentPage={currentPage}
+          currentPage={pageFromUrl}
           totalPages={totalPages}
           buildUrl={buildUrl}
         />
       )}
     </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PAGE EXPORT — envuelve en Suspense por useSearchParams
+// ─────────────────────────────────────────────────────────────────────────────
+export default function ProductsMarketplacePage() {
+  return (
+    <Suspense fallback={<ProductSkeletonGrid />}>
+      <ProductsPageContent />
+    </Suspense>
   );
 }
