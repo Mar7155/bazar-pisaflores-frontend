@@ -678,7 +678,29 @@ export async function activeBusiness(businessId: string): Promise<void> {
     return;
   }
   await sleep(300);
+}
 
+/**
+ * Actualiza las coordenadas geográficas de un negocio.
+ * Llama a PATCH /businesses/:id/coordinates
+ */
+export async function updateBusinessCoordinates(
+  businessId: string,
+  latitude: number,
+  longitude: number
+): Promise<void> {
+  if (!USE_MOCK) {
+    await apiFetch<void>(`/businesses/${businessId}/coordinates`, {
+      method: "PATCH",
+      body: JSON.stringify({ latitude, longitude }),
+    });
+    return;
+  }
+  await sleep(300);
+  const idx = businessesMock.findIndex(b => b.id === businessId);
+  if (idx !== -1) {
+    businessesMock[idx] = { ...businessesMock[idx], latitude, longitude };
+  }
 }
 
 export async function deleteBusiness(businessId: string): Promise<void> {

@@ -14,6 +14,12 @@ const nextConfig: NextConfig = {
         hostname: 'bazar-pisaflores-uploads.s3.amazonaws.com',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+        port: '',
+        pathname: '/**',
       }
     ],
   },

@@ -67,6 +67,9 @@ export function Navbar() {
           <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">
             Productos
           </Link>
+          <Link href="/map" onClick={() => setIsMenuOpen(false)} className="px-4 py-3 rounded-xl hover:bg-muted font-semibold text-lg">
+              Mapa
+            </Link>
           <Link href="/flash-offers" className="text-sm font-medium hover:text-primary transition-colors">
             Ofertas
           </Link>
@@ -148,8 +151,11 @@ export function Navbar() {
             <Link href="/businesses" onClick={() => setIsMenuOpen(false)} className="px-4 py-3 rounded-xl hover:bg-muted font-semibold text-lg">
               Negocios locales
             </Link>
-            <Link href="/products" className="px-4 py-3 rounded-xl hover:bg-muted font-semibold text-lg">
+            <Link href="/products" onClick={() => setIsMenuOpen(false)} className="px-4 py-3 rounded-xl hover:bg-muted font-semibold text-lg">
               Productos
+            </Link>
+            <Link href="/map" onClick={() => setIsMenuOpen(false)} className="px-4 py-3 rounded-xl hover:bg-muted font-semibold text-lg">
+              Mapa De Negocios
             </Link>
             <Link href="/flash-offers" onClick={() => setIsMenuOpen(false)} className="px-4 py-3 rounded-xl hover:bg-muted font-semibold text-lg text-accent">
               Ofertas Relámpago
