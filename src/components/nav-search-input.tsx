@@ -3,29 +3,29 @@
 /**
  * NavSearchInput — Buscador del Navbar
  *
- * - Lee el query param `?q=` actual con useSearchParams para pre-rellenar el valor
- *   cuando el usuario ya está en /search (o cualquier página con ?q=).
- * - Navega a /search?q=... al hacer submit.
- * - Acepta un callback onSubmit para que el navbar pueda cerrar el menú mobile.
+ * useSearchParams() requiere Suspense para que Next.js pueda prerenderizar
+ * estáticamente el shell sin ejecutarlo en build time.
+ *
+ * Patrón: componente interno (SearchInputContent) contiene el hook,
+ * componente exportado (NavSearchInput) lo envuelve en Suspense con un
+ * fallback visualmente idéntico para evitar layout shift.
  */
 
+import { Suspense, useRef, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { useRef, useEffect } from "react";
 import { Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface NavSearchInputProps {
-  /** Clases adicionales para el contenedor */
   className?: string;
-  /** Placeholder del input */
   placeholder?: string;
-  /** Tamaño visual: "sm" para desktop, "md" para mobile */
   size?: "sm" | "md";
-  /** Callback que se ejecuta justo antes de navegar (ej. cerrar menú mobile) */
   onSubmit?: () => void;
 }
 
-export function NavSearchInput({
+// ── Componente interno — contiene useSearchParams ─────────────────────────────
+
+function SearchInputContent({
   className,
   placeholder = "Buscar...",
   size = "sm",
@@ -35,7 +35,7 @@ export function NavSearchInput({
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Pre-rellenar con el valor actual de ?q= cuando el componente monta o la URL cambia
+  // Pre-rellenar con el valor actual de ?q= cuando la URL cambia
   useEffect(() => {
     const currentQ = searchParams.get("q") ?? "";
     if (inputRef.current) {
@@ -47,7 +47,6 @@ export function NavSearchInput({
     e.preventDefault();
     const q = inputRef.current?.value.trim() ?? "";
     onSubmit?.();
-    // Navegar a /search preservando el query (vacío = ver todos)
     router.push(`/search${q ? `?q=${encodeURIComponent(q)}` : ""}`);
   };
 
@@ -62,9 +61,7 @@ export function NavSearchInput({
           "rounded-full bg-muted/50 border border-transparent",
           "focus:border-primary focus:bg-background focus:ring-2 focus:ring-primary/20",
           "outline-none transition-all text-sm",
-          size === "sm"
-            ? "pl-10 pr-4 py-2 w-64"
-            : "pl-10 pr-4 py-3 w-full text-base"
+          size === "sm" ? "pl-10 pr-4 py-2 w-64" : "pl-10 pr-4 py-3 w-full text-base"
         )}
       />
       <button
@@ -75,5 +72,35 @@ export function NavSearchInput({
         <Search className={cn(size === "sm" ? "w-4 h-4" : "w-5 h-5")} />
       </button>
     </form>
+  );
+}
+
+// ── Fallback estático — visualmente idéntico, sin comportamiento ──────────────
+
+function SearchInputFallback({ className, placeholder = "Buscar...", size = "sm" }: NavSearchInputProps) {
+  return (
+    <div className={cn("relative", className)}>
+      <input
+        type="text"
+        placeholder={placeholder}
+        disabled
+        className={cn(
+          "rounded-full bg-muted/50 border border-transparent",
+          "outline-none text-sm",
+          size === "sm" ? "pl-10 pr-4 py-2 w-64" : "pl-10 pr-4 py-3 w-full text-base"
+        )}
+      />
+      <Search className={cn("absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground", size === "sm" ? "w-4 h-4" : "w-5 h-5")} />
+    </div>
+  );
+}
+
+// ── Componente exportado — envuelve en Suspense ───────────────────────────────
+
+export function NavSearchInput(props: NavSearchInputProps) {
+  return (
+    <Suspense fallback={<SearchInputFallback {...props} />}>
+      <SearchInputContent {...props} />
+    </Suspense>
   );
 }
