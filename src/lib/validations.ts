@@ -91,6 +91,27 @@ export const SchedulesSchema = z.object({
   schedules: z.array(ScheduleDaySchema)
 });
 
+// ── Travel Route ──────────────────────────────────────────────────────────────
+export const TravelRouteFormSchema = z.object({
+  departure_time:   z.date({ error: "Selecciona la fecha y hora de salida." }),
+  available_seats:  z.number().int().min(0, { message: "No puede ser negativo." }).max(50),
+  accepts_packages: z.boolean(),
+  route_color:      z.string().min(4).max(10),
+}).refine(data => {
+  // No permitir fechas pasadas
+  if (!data.departure_time) return true;
+  return data.departure_time > new Date();
+}, { message: "La fecha de salida debe ser futura.", path: ["departure_time"] })
+.refine(data => {
+  // No más de 2 meses en el futuro
+  if (!data.departure_time) return true;
+  const maxDate = new Date();
+  maxDate.setMonth(maxDate.getMonth() + 2);
+  return data.departure_time <= maxDate;
+}, { message: "La salida no puede programarse con más de 2 meses de anticipación.", path: ["departure_time"] });
+
+export type TravelRouteFormValues = z.infer<typeof TravelRouteFormSchema>;
+
 export type UserRegistrationFormValues = z.infer<typeof UserRegistrationSchema>;
 export type BusinessRegistrationFormValues = z.infer<typeof BusinessRegistrationSchema>;
 export type ProductRegistrationFormValues = z.infer<typeof ProductRegistrationSchema>;

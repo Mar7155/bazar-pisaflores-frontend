@@ -886,3 +886,144 @@ export async function deleteFlashOffer(businessId: string, offerId: string): Pro
   await sleep(300);
   flashOffersMock = flashOffersMock.filter(o => o.id !== offerId);
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TRAVEL ROUTES
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type TravelRouteStatus = "active" | "completed" | "cancelled" | "full";
+
+export interface TravelRoute {
+  id:                  string;
+  business_id:         string;
+  origin_name:         string;
+  origin_lat:          number;
+  origin_lng:          number;
+  dest_name:           string;
+  dest_lat:            number;
+  dest_lng:            number;
+  waypoints:           Record<string, unknown>;
+  departure_time:      string;           // ISO 8601
+  estimated_duration:  number | null;   // minutos
+  available_seats:     number;
+  accepts_packages:    boolean;
+  route_color:         string;
+  status:              TravelRouteStatus;
+  created_at:          string;
+  updated_at:          string;
+  // Relación enriquecida desde el GET público
+  businessName?:       string;
+  phone: string;
+}
+
+export interface CreateTravelRouteDTO {
+  origin_name:         string;
+  origin_lat:          number;
+  origin_lng:          number;
+  dest_name:           string;
+  dest_lat:            number;
+  dest_lng:            number;
+  departure_time:      string;           // ISO 8601
+  waypoints?:          Record<string, unknown>;
+  estimated_duration?: number;
+  available_seats?:    number;
+  accepts_packages?:   boolean;
+  route_color?:        string;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function normalizeTravelRoute(raw: any): TravelRoute {
+  return {
+    id:                 raw.id,
+    business_id:        raw.business_id  ?? raw.businessId,
+    origin_name:        raw.origin_name,
+    origin_lat:         parseFloat(raw.origin_lat),
+    origin_lng:         parseFloat(raw.origin_lng),
+    dest_name:          raw.dest_name,
+    dest_lat:           parseFloat(raw.dest_lat),
+    dest_lng:           parseFloat(raw.dest_lng),
+    waypoints:          typeof raw.waypoints === "object" ? raw.waypoints ?? {} : {},
+    departure_time:     raw.departure_time,
+    estimated_duration: raw.estimated_duration ?? null,
+    available_seats:    raw.available_seats ?? 0,
+    accepts_packages:   raw.accepts_packages ?? false,
+    route_color:        raw.route_color ?? "#3b82f6",
+    status:             raw.status ?? "active",
+    created_at:         raw.created_at,
+    updated_at:         raw.updated_at,
+    businessName:       raw.businessName ?? raw.business_name ?? "",
+    phone: raw.phone ?? ""
+  };
+}
+
+/** Crea una ruta de viaje para un negocio (requiere token). */
+export async function createTravelRoute(
+  businessId: string,
+  data: CreateTravelRouteDTO
+): Promise<TravelRoute> {
+  const raw = await apiFetch<unknown>(`/businesses/${businessId}/travel-routes`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+  return normalizeTravelRoute(raw);
+}
+
+/** Búsqueda pública paginada de rutas con filtros opcionales. */
+export async function getTravelRoutes(opts?: {
+  origin?:           string;
+  destination?:      string;
+  date?:             string;
+  accepts_packages?: boolean;
+  limit?:            number;
+  offset?:           number;
+}): Promise<PaginatedResponse<TravelRoute>> {
+  const limit  = opts?.limit  ?? 10;
+  const offset = opts?.offset ?? 0;
+
+  const params = new URLSearchParams();
+  params.append("limit",  String(limit));
+  params.append("offset", String(offset));
+  if (opts?.origin)           params.append("origin",           opts.origin);
+  if (opts?.destination)      params.append("destination",      opts.destination);
+  if (opts?.date)             params.append("date",             opts.date);
+  if (opts?.accepts_packages) params.append("accepts_packages", "true");
+
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const raw = await apiFetch<any>(`/travel-routes?${params.toString()}`);
+    const data  = extractArray<unknown>(raw).map(normalizeTravelRoute);
+    const total = typeof raw?.total === "number" ? raw.total : data.length;
+    return { data, total, limit, offset };
+  } catch {
+    return { data: [], total: 0, limit, offset };
+  }
+}
+
+/** Obtiene todas las rutas de un negocio específico. */
+export async function getBusinessTravelRoutes(businessId: string): Promise<TravelRoute[]> {
+  try {
+    const raw = await apiFetch<unknown>(`/travel-routes/${businessId}`);
+    return extractArray<unknown>(raw).map(normalizeTravelRoute);
+  } catch {
+    return [];
+  }
+}
+
+/** Actualiza el status de una ruta (active | completed | cancelled | full). */
+export async function updateTravelRouteStatus(
+  businessId: string,
+  routeId: string,
+  status: TravelRouteStatus
+): Promise<void> {
+  await apiFetch<void>(`/businesses/${businessId}/travel-routes/${routeId}`, {
+    method: "PATCH",
+    body: JSON.stringify({ status }),
+  });
+}
+
+/** Elimina una ruta (hard delete). */
+export async function deleteTravelRoute(businessId: string, routeId: string): Promise<void> {
+  await apiFetch<void>(`/businesses/${businessId}/travel-routes/${routeId}`, {
+    method: "DELETE",
+  });
+}

@@ -40,7 +40,9 @@ export function getWhatsAppLink(
   phone: string | null | undefined,
   businessName: string,
   productName?: string,
-  price?: number
+  price?: number,
+  isTravel?: boolean,
+  date?: string,
 ): string {
   // Retornar vacío si no hay teléfono — el caller decide si renderiza el botón
   if (!phone) return "";
@@ -56,7 +58,13 @@ export function getWhatsAppLink(
       `¡Hola, ${businessName}! Estoy interesado en el producto "${productName}" ` +
       `que vi en Bazar Pisaflores con precio de $${price}. ` +
       `¿Tienen disponibilidad y cuentan con servicio a domicilio?`;
-  } else {
+  } 
+  else if (isTravel && date !== undefined ) {
+    message =
+      `¡Hola, ${businessName}!, vi tu ruta en Bazar Pisaflores.` +
+      `¿Aún tienes lugares disponibles o espacio para paqueteria el dia ${date}? `;
+  }
+  else {
     // Mensaje general de negocio
     message =
       `Hola, buenas tardes. Encontré su negocio "${businessName}" en Bazar Pisaflores. ` +

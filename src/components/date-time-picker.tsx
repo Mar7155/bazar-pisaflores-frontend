@@ -84,6 +84,8 @@ export interface DateTimePickerProps {
   className?: string;
   /** ID para asociar con un <Label htmlFor="..."> */
   id?: string;
+  /** Fecha máxima seleccionable (inclusive) */
+  maxDate?: Date;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -97,6 +99,7 @@ export function DateTimePicker({
   disabled = false,
   className,
   id,
+  maxDate,
 }: DateTimePickerProps) {
   const [open, setOpen] = React.useState(false);
 
@@ -221,7 +224,10 @@ export function DateTimePicker({
           mode="single"
           selected={value}
           onSelect={handleDaySelect}
-          disabled={{ before: today }}
+          disabled={[
+            { before: today },
+            ...(maxDate ? [{ after: maxDate }] : []),
+          ]}
           initialFocus
           locale={es}
         />
