@@ -350,15 +350,34 @@ export async function getBusinessById(id: string): Promise<Business | null> {
   return { ...b, products: productsMock.filter(p => p.business_id === id), flash_offers: flashOffersMock.filter(o => o.business_id === id) };
 }
 
-export async function getProductsByBusinessId(id: string): Promise<Product[]> {
+export async function getProductsByBusinessId(
+  id: string,
+  opts?: { limit?: number; offset?: number; q?: string }
+): Promise<PaginatedResponse<Product>> {
+  const limit  = opts?.limit  ?? 5;
+  const offset = opts?.offset ?? 0;
+
   if (!USE_MOCK) {
     try {
-      const raw = await apiFetch<unknown>(`/businesses/${id}/products`);
-      return extractArray<unknown>(raw).map(normalizeProduct);
-    } catch { return []; }
+      const params = new URLSearchParams();
+      params.append("limit",  String(limit));
+      params.append("offset", String(offset));
+      if (opts?.q) params.append("q", opts.q);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const raw = await apiFetch<any>(`/businesses/${id}/products?${params.toString()}`);
+      const data  = extractArray<unknown>(raw).map(normalizeProduct);
+      const total = typeof raw?.total === "number" ? raw.total : data.length;
+      return { data, total, limit, offset };
+    } catch { return { data: [], total: 0, limit, offset }; }
   }
   await sleep(80);
-  return productsMock.filter(p => p.business_id === id);
+  let res = productsMock.filter(p => p.business_id === id);
+  if (opts?.q) {
+    const q = opts.q.toLowerCase();
+    res = res.filter(p => p.name.toLowerCase().includes(q) || p.description?.toLowerCase().includes(q));
+  }
+  const total = res.length;
+  return { data: res.slice(offset, offset + limit), total, limit, offset };
 }
 
 export async function getOwnerBusinesses(): Promise<Business[]> {
