@@ -1,30 +1,53 @@
 import { Clock, MapPin, MessageCircle, Store, Flame, ImageIcon, ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { getBusinessById, getProductsByBusinessId, getBusinessProductById } from "@/lib/api";
+import { getBusinessById, getProductsByBusinessId } from "@/lib/api";
 import { getImageUrl, getWhatsAppLink } from "@/lib/utils";
 import { notFound } from "next/navigation";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import Image from "next/image";
 import { FlashOfferCard } from "@/components/dashboard/flash-offer-card";
 import { ProductCatalog } from "@/components/business/product-catalog";
+import { PaginationBar } from "@/components/pagination-bar";
 import { Button } from "@/components/ui/button";
+
+const PRODUCTS_PER_PAGE = 10;
+
+function buildProdPageUrl(businessId: string, prodPage: number): string {
+  const params = new URLSearchParams();
+  if (prodPage > 1) params.set("prodPage", String(prodPage));
+  const qs = params.toString();
+  return `/businesses/${businessId}${qs ? `?${qs}` : ""}`;
+}
 
 export default async function BusinessProfile({
   params,
+  searchParams,
 }: {
-  params: Promise<{ id: string }>;
+  params:       Promise<{ id: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const { id } = await params;
-  const business = await getBusinessById(id);
-  // Cargar productos con sus imagenes en paralelo usando el endpoint que incluye images[]
-  const productsBasic = await getProductsByBusinessId(id);
-  const products = await Promise.all(
-    productsBasic.map(p => getBusinessProductById(id, p.id).then(full => full ?? p))
-  );
+  const resolved = await searchParams;
+
+  // Paginación del catálogo — usa ?prodPage= para coexistir con otras paginaciones
+  const prodPage = typeof resolved.prodPage === "string"
+    ? Math.max(1, parseInt(resolved.prodPage, 10) || 1)
+    : 1;
+  const productOffset = (prodPage - 1) * PRODUCTS_PER_PAGE;
+
+  // Una sola llamada al backend — sin N+1
+  const [business, productsResponse] = await Promise.all([
+    getBusinessById(id),
+    getProductsByBusinessId(id, { limit: PRODUCTS_PER_PAGE, offset: productOffset }),
+  ]);
 
   if (!business) {
     notFound();
   }
+
+  const products      = productsResponse.data;
+  const productsTotal = productsResponse.total;
+  const productPages  = Math.max(1, Math.ceil(productsTotal / PRODUCTS_PER_PAGE));
 
   // Calculate if currently open based on today's schedule
   const today = new Date().getDay();
@@ -209,6 +232,17 @@ export default async function BusinessProfile({
           })()}
 
           <ProductCatalog products={products} businessPhone={business.phone} businessName={business.name} />
+
+          {/* Paginación del catálogo — usa ?prodPage= para no colisionar con otras páginas */}
+          {productPages > 1 && (
+            <div className="mt-6">
+              <PaginationBar
+                currentPage={prodPage}
+                totalPages={productPages}
+                buildUrl={(page) => buildProdPageUrl(id, page)}
+              />
+            </div>
+          )}
         </div>
       </div>
     </section>

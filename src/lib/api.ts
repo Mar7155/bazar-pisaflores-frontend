@@ -402,15 +402,33 @@ export async function getOwnerBusinessesById(id: string): Promise<Business | nul
   return businessesMock.find(b => b.id === id) || null;
 }
 
-export async function getBusinessOffers(businessId: string): Promise<FlashOffer[]> {
+export async function getBusinessOffers(
+  businessId: string,
+  opts?: { limit?: number; offset?: number }
+): Promise<PaginatedResponse<FlashOffer>> {
+  const limit  = opts?.limit  ?? 10;
+  const offset = opts?.offset ?? 0;
+
   if (!USE_MOCK) {
     try {
-      const raw = await apiFetch<unknown>(`/businesses/${businessId}/flash-offers`);
-      return extractArray<unknown>(raw).map(normalizeFlashOffer);
-    } catch { return []; }
+      const params = new URLSearchParams();
+      params.append("limit",  String(limit));
+      params.append("offset", String(offset));
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const raw = await apiFetch<any>(`/businesses/${businessId}/flash-offers?${params.toString()}`);
+      const data  = extractArray<unknown>(raw).map(normalizeFlashOffer);
+      const total = typeof raw?.total === "number" ? raw.total : data.length;
+      return { data, total, limit, offset };
+    } catch { return { data: [], total: 0, limit, offset }; }
   }
   await sleep(80);
-  return flashOffersMock.filter(o => o.business_id === businessId);
+  const all = flashOffersMock.filter(o => o.business_id === businessId);
+  return {
+    data:   all.slice(offset, offset + limit),
+    total:  all.length,
+    limit,
+    offset,
+  };
 }
 
 export async function getFlashOffers(opts?: { categoryId?: string; limit?: number; offset?: number }): Promise<PaginatedResponse<FlashOffer>> {
