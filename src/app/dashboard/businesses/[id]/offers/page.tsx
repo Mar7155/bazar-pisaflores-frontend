@@ -20,7 +20,8 @@ export default async function DashboardBusinessOffersPage({
     notFound();
   }
 
-  const offers = await getBusinessOffers(id);
+  const offersResponse = await getBusinessOffers(id);
+  const offers = offersResponse.data;
   const activeOffersCount = offers.filter(o => o.is_active && new Date() < new Date(o.expires_at)).length;
 
   return (
